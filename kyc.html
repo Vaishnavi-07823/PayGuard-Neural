@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayGuard Neural — KYC &amp; Security Verification</title>
+  <meta name="description" content="Complete your identity verification and security setup to activate your PayGuard Neural account." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset ──────────────────────────────────────── */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg-deep:#06060f;
+      --bg-card:rgba(15,14,35,.55);
+      --glass-border:rgba(120,100,255,.15);
+      --accent:#7c5cfc;
+      --accent-glow:#9b7dff;
+      --accent-2:#00d4ff;
+      --text-primary:#eae8ff;
+      --text-secondary:#9994c4;
+      --text-muted:#5e577e;
+      --input-bg:rgba(22,20,50,.7);
+      --input-border:rgba(120,100,255,.2);
+      --danger:#ff5c7c;
+      --success:#00e89d;
+      --warning:#ffb84d;
+      --radius-lg:20px;
+      --radius-md:14px;
+      --radius-sm:10px;
+    }
+
+    html{font-size:16px}
+
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:var(--bg-deep);
+      color:var(--text-primary);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    /* ── Canvas ─────────────────────────────────────── */
+    #neuralCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+    /* ── Orbs ───────────────────────────────────────── */
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.3;z-index:0;animation:orbF 12s ease-in-out infinite alternate}
+    .orb--1{width:500px;height:500px;background:radial-gradient(circle,#7c5cfc 0%,transparent 70%);top:-10%;left:-8%;animation-duration:14s}
+    .orb--2{width:400px;height:400px;background:radial-gradient(circle,#00d4ff 0%,transparent 70%);bottom:-12%;right:-6%;animation-duration:10s;animation-delay:-4s}
+    .orb--3{width:300px;height:300px;background:radial-gradient(circle,#c44dff 0%,transparent 70%);top:50%;left:60%;animation-duration:16s;animation-delay:-8s}
+    @keyframes orbF{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.08)}100%{transform:translate(-20px,25px) scale(.95)}}
+
+    /* ── Main Wrapper ───────────────────────────────── */
+    .kyc-wrapper{
+      position:relative;z-index:10;width:100%;max-width:520px;padding:20px;
+      animation:cardEnter .9s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(30px) scale(.97);
+    }
+    @keyframes cardEnter{to{opacity:1;transform:translateY(0) scale(1)}}
+
+    .kyc-card{
+      background:var(--bg-card);
+      backdrop-filter:blur(40px) saturate(1.4);
+      -webkit-backdrop-filter:blur(40px) saturate(1.4);
+      border:1px solid var(--glass-border);
+      border-radius:var(--radius-lg);
+      padding:36px 32px 32px;
+      position:relative;overflow:hidden;
+      box-shadow:0 4px 60px rgba(124,92,252,.08),0 0 0 1px rgba(124,92,252,.06) inset;
+    }
+    .kyc-card::before{
+      content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:3px;
+      background:linear-gradient(90deg,transparent,var(--accent),var(--accent-2),transparent);
+      border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    /* ── Brand Header ───────────────────────────────── */
+    .brand-mini{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+    .brand-mini__icon{
+      width:40px;height:40px;border-radius:10px;
+      background:linear-gradient(135deg,rgba(124,92,252,.2),rgba(0,212,255,.1));
+      border:1px solid rgba(124,92,252,.25);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .brand-mini__icon img{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(124,92,252,.4))}
+    .brand-mini__text{font-family:'Outfit',sans-serif;font-size:1.15rem;font-weight:700;
+      background:linear-gradient(135deg,#e0d8ff,#9b7dff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+
+    /* ── Progress Stepper ───────────────────────────── */
+    .stepper{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:30px;position:relative}
+    .step-node{
+      width:36px;height:36px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.78rem;font-weight:700;
+      border:2px solid var(--input-border);background:var(--input-bg);color:var(--text-muted);
+      transition:all .5s cubic-bezier(.16,1,.3,1);position:relative;z-index:2;flex-shrink:0;
+    }
+    .step-node.active{border-color:var(--accent);color:#fff;background:var(--accent);box-shadow:0 0 18px rgba(124,92,252,.35)}
+    .step-node.done{border-color:var(--success);background:var(--success);color:#fff}
+    .step-node .check-svg{display:none}
+    .step-node.done .step-num{display:none}
+    .step-node.done .check-svg{display:block}
+    .step-connector{width:40px;height:2px;background:var(--input-border);transition:background .5s;flex-shrink:0}
+    .step-connector.done{background:var(--success)}
+    .step-labels{display:flex;justify-content:space-between;margin-top:10px;padding:0 2px}
+    .step-label{font-size:.65rem;color:var(--text-muted);text-align:center;width:60px;transition:color .4s;text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+    .step-label.active{color:var(--accent-glow)}
+    .step-label.done{color:var(--success)}
+
+    /* ── Step Panels ────────────────────────────────── */
+    .step-panel{display:none;animation:panelIn .5s cubic-bezier(.16,1,.3,1) forwards}
+    .step-panel.active{display:block}
+    @keyframes panelIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+
+    .panel-title{font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:600;margin-bottom:4px}
+    .panel-subtitle{font-size:.83rem;color:var(--text-secondary);margin-bottom:22px;line-height:1.5}
+
+    /* ── Form Elements ──────────────────────────────── */
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:.74rem;font-weight:500;color:var(--text-secondary);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+    .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .input-field{
+      width:100%;padding:12px 14px;
+      background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--radius-sm);
+      color:var(--text-primary);font-family:'Inter',sans-serif;font-size:.88rem;outline:none;
+      transition:all .3s ease;
+    }
+    .input-field::placeholder{color:var(--text-muted)}
+    .input-field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.12),0 0 20px rgba(124,92,252,.06);background:rgba(22,20,50,.9)}
+
+    select.input-field{cursor:pointer;appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239994c4' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+    }
+    select.input-field option{background:#12102e;color:var(--text-primary)}
+
+    /* ── Document Cards ─────────────────────────────── */
+    .doc-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+    .doc-card{
+      padding:14px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--input-border);
+      background:var(--input-bg);cursor:pointer;text-align:center;transition:all .3s ease;
+    }
+    .doc-card:hover{border-color:rgba(124,92,252,.4);background:rgba(124,92,252,.06)}
+    .doc-card.selected{border-color:var(--accent);background:rgba(124,92,252,.1);box-shadow:0 0 16px rgba(124,92,252,.15)}
+    .doc-card__icon{font-size:1.6rem;margin-bottom:6px;display:block}
+    .doc-card__label{font-size:.76rem;font-weight:600;color:var(--text-secondary)}
+    .doc-card.selected .doc-card__label{color:var(--accent-glow)}
+
+    /* ── Upload Zone ────────────────────────────────── */
+    .upload-zone{
+      border:2px dashed var(--input-border);border-radius:var(--radius-md);
+      padding:28px 20px;text-align:center;cursor:pointer;
+      transition:all .3s ease;position:relative;overflow:hidden;
+    }
+    .upload-zone:hover{border-color:var(--accent);background:rgba(124,92,252,.04)}
+    .upload-zone.dragging{border-color:var(--accent-2);background:rgba(0,212,255,.06);transform:scale(1.01)}
+    .upload-zone.uploaded{border-color:var(--success);border-style:solid;background:rgba(0,232,157,.05)}
+    .upload-zone__icon{margin-bottom:10px}
+    .upload-zone__icon svg{width:36px;height:36px;color:var(--text-muted);transition:color .3s}
+    .upload-zone:hover .upload-zone__icon svg{color:var(--accent-glow)}
+    .upload-zone.uploaded .upload-zone__icon svg{color:var(--success)}
+    .upload-zone__text{font-size:.84rem;color:var(--text-secondary);line-height:1.5}
+    .upload-zone__text strong{color:var(--accent-glow);font-weight:600}
+    .upload-zone__hint{font-size:.72rem;color:var(--text-muted);margin-top:6px}
+    .upload-zone input[type="file"]{display:none}
+    .upload-filename{font-size:.8rem;color:var(--success);font-weight:600;margin-top:8px;display:none;align-items:center;justify-content:center;gap:6px}
+    .upload-filename.show{display:flex}
+
+    /* ── Selfie Section ─────────────────────────────── */
+    .selfie-area{
+      width:200px;height:200px;border-radius:50%;margin:0 auto 20px;
+      border:3px solid var(--input-border);position:relative;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(22,20,50,.8);transition:all .5s ease;
+    }
+    .selfie-area.scanning{border-color:var(--accent);animation:scanPulse 2s ease-in-out infinite}
+    .selfie-area.verified{border-color:var(--success);box-shadow:0 0 30px rgba(0,232,157,.2)}
+    @keyframes scanPulse{0%,100%{box-shadow:0 0 0 0 rgba(124,92,252,.3)}50%{box-shadow:0 0 0 14px rgba(124,92,252,0)}}
+    .selfie-area__placeholder svg{width:60px;height:60px;color:var(--text-muted)}
+    .selfie-area.scanning .selfie-area__placeholder svg{color:var(--accent-glow)}
+    .selfie-area.verified .selfie-area__placeholder svg{color:var(--success)}
+    .scan-line{
+      position:absolute;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,transparent,var(--accent-2),transparent);
+      opacity:0;pointer-events:none;
+    }
+    .selfie-area.scanning .scan-line{opacity:1;animation:scanMove 2s ease-in-out infinite}
+    @keyframes scanMove{0%{top:10%}50%{top:85%}100%{top:10%}}
+    .selfie-status{text-align:center;font-size:.85rem;color:var(--text-secondary);margin-bottom:16px;min-height:22px}
+    .selfie-status.success{color:var(--success);font-weight:600}
+
+    /* ── Security PIN ───────────────────────────────── */
+    .pin-inputs{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
+    .pin-box{
+      width:50px;height:56px;text-align:center;font-size:1.4rem;font-weight:700;font-family:'Outfit',sans-serif;
+      background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--radius-sm);
+      color:var(--accent-glow);outline:none;transition:all .3s ease;
+      -moz-appearance:textfield;
+    }
+    .pin-box::-webkit-outer-spin-button,.pin-box::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .pin-box:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.15);background:rgba(22,20,50,.9)}
+    .pin-box.filled{border-color:var(--accent)}
+    .pin-match{text-align:center;font-size:.78rem;margin-bottom:16px;min-height:18px;transition:all .3s}
+    .pin-match.error{color:var(--danger)}
+    .pin-match.match{color:var(--success)}
+
+    /* ── Security Options ───────────────────────────── */
+    .security-option{
+      display:flex;align-items:center;gap:14px;padding:14px 16px;
+      border-radius:var(--radius-sm);border:1px solid var(--input-border);
+      background:var(--input-bg);margin-bottom:10px;cursor:pointer;transition:all .3s ease;
+    }
+    .security-option:hover{border-color:rgba(124,92,252,.35);background:rgba(124,92,252,.05)}
+    .security-option.enabled{border-color:var(--success);background:rgba(0,232,157,.05)}
+    .security-option__icon{font-size:1.3rem;width:36px;text-align:center;flex-shrink:0}
+    .security-option__info{flex:1}
+    .security-option__title{font-size:.85rem;font-weight:600;margin-bottom:2px}
+    .security-option__desc{font-size:.72rem;color:var(--text-muted)}
+    .toggle-switch{
+      width:42px;height:24px;border-radius:12px;
+      background:var(--input-border);position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;
+    }
+    .toggle-switch.on{background:var(--success)}
+    .toggle-switch::after{
+      content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;
+      border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.16,1,.3,1);
+    }
+    .toggle-switch.on::after{transform:translateX(18px)}
+
+    /* ── Success Panel ──────────────────────────────── */
+    .success-container{text-align:center;padding:20px 0}
+    .success-circle{
+      width:100px;height:100px;border-radius:50%;margin:0 auto 24px;
+      background:linear-gradient(135deg,rgba(0,232,157,.15),rgba(0,212,255,.1));
+      border:2px solid var(--success);
+      display:flex;align-items:center;justify-content:center;
+      animation:successPop .6s cubic-bezier(.16,1,.3,1) forwards;
+      transform:scale(0);
+    }
+    @keyframes successPop{to{transform:scale(1)}}
+    .success-circle svg{width:48px;height:48px;color:var(--success)}
+    .success-title{font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:700;
+      background:linear-gradient(135deg,#00e89d,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+    .success-subtitle{font-size:.88rem;color:var(--text-secondary);line-height:1.6;margin-bottom:28px}
+    .verified-badges{display:flex;justify-content:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+    .v-badge{
+      display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;
+      background:rgba(0,232,157,.08);border:1px solid rgba(0,232,157,.2);
+      font-size:.76rem;font-weight:600;color:var(--success);
+      animation:badgeFade .5s ease forwards;opacity:0;
+    }
+    .v-badge:nth-child(1){animation-delay:.3s}
+    .v-badge:nth-child(2){animation-delay:.5s}
+    .v-badge:nth-child(3){animation-delay:.7s}
+    .v-badge:nth-child(4){animation-delay:.9s}
+    @keyframes badgeFade{to{opacity:1}}
+
+    /* ── Buttons ────────────────────────────────────── */
+    .btn-row{display:flex;gap:12px;margin-top:24px}
+    .btn{
+      flex:1;padding:13px 20px;border:none;border-radius:var(--radius-sm);
+      font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;
+      cursor:pointer;transition:all .3s ease;letter-spacing:.02em;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent) 0%,#6441e0 50%,var(--accent-2) 100%);
+      background-size:200% 200%;color:#fff;
+      animation:btnShim 4s ease-in-out infinite;
+    }
+    @keyframes btnShim{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,92,252,.35)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-secondary{
+      background:var(--input-bg);border:1px solid var(--input-border);color:var(--text-secondary);
+    }
+    .btn-secondary:hover{border-color:var(--accent);color:var(--text-primary);background:rgba(124,92,252,.08)}
+    .btn-success{
+      background:linear-gradient(135deg,#00e89d,#00b87c);color:#fff;
+    }
+    .btn-success:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,232,157,.3)}
+
+    /* ── Info Alert ──────────────────────────────────── */
+    .info-box{
+      display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+      border-radius:var(--radius-sm);background:rgba(124,92,252,.06);
+      border:1px solid rgba(124,92,252,.15);margin-bottom:18px;
+    }
+    .info-box svg{width:18px;height:18px;color:var(--accent-glow);flex-shrink:0;margin-top:1px}
+    .info-box p{font-size:.78rem;color:var(--text-secondary);line-height:1.55}
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media(max-width:540px){
+      .kyc-card{padding:28px 18px 24px}
+      .form-row-2{grid-template-columns:1fr}
+      .doc-options{grid-template-columns:1fr 1fr}
+      .pin-box{width:44px;height:50px;font-size:1.2rem}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb--1"></div>
+  <div class="orb orb--2"></div>
+  <div class="orb orb--3"></div>
+  <canvas id="neuralCanvas"></canvas>
+
+  <div class="kyc-wrapper">
+    <div class="kyc-card">
+
+      <!-- Brand Mini -->
+      <div class="brand-mini">
+        <div class="brand-mini__icon"><img src="logo.png" alt="PayGuard Neural" /></div>
+        <span class="brand-mini__text">PayGuard Neural</span>
+      </div>
+
+      <!-- Stepper -->
+      <div class="stepper" id="stepper">
+        <div class="step-node active" data-step="1">
+          <span class="step-num">1</span>
+          <svg class="check-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="step-connector" data-conn="1"></div>
+        <div class="step-node" data-step="2">
+          <span class="step-num">2</span>
+          <svg class="check-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="step-connector" data-conn="2"></div>
+        <div class="step-node" data-step="3">
+          <span class="step-num">3</span>
+          <svg class="check-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="step-connector" data-conn="3"></div>
+        <div class="step-node" data-step="4">
+          <span class="step-num">4</span>
+          <svg class="check-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="step-labels" id="stepLabels">
+        <span class="step-label active">Personal</span>
+        <span class="step-label">Identity</span>
+        <span class="step-label">Selfie</span>
+        <span class="step-label">Security</span>
+      </div>
+
+      <!-- ═══════════ STEP 1 — Personal Details ═══════════ -->
+      <div class="step-panel active" id="panel1">
+        <h2 class="panel-title">Personal Information</h2>
+        <p class="panel-subtitle">Provide your details as per your government ID</p>
+
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Your data is encrypted end-to-end and used solely for verification. We comply with RBI guidelines and data protection laws.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="fullName">Full Legal Name</label>
+          <input class="input-field" type="text" id="fullName" placeholder="As shown on your Aadhaar / PAN" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input class="input-field" type="date" id="dob" required />
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select class="input-field" id="gender" required>
+              <option value="" disabled selected>Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="pan">PAN Number</label>
+          <input class="input-field" type="text" id="pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" required />
+        </div>
+        <div class="form-group">
+          <label for="address">Residential Address</label>
+          <input class="input-field" type="text" id="address" placeholder="House / Street / Locality" required />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input class="input-field" type="text" id="city" placeholder="City" required />
+          </div>
+          <div class="form-group">
+            <label for="pincode">PIN Code</label>
+            <input class="input-field" type="text" id="pincode" placeholder="6-digit" maxlength="6" required />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="next1">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ STEP 2 — Identity Verification ═══════════ -->
+      <div class="step-panel" id="panel2">
+        <h2 class="panel-title">Identity Verification</h2>
+        <p class="panel-subtitle">Choose a government-issued ID and upload a clear photo</p>
+
+        <div class="form-group">
+          <label>Select Document Type</label>
+          <div class="doc-options" id="docOptions">
+            <div class="doc-card selected" data-doc="aadhaar">
+              <span class="doc-card__icon">🪪</span>
+              <span class="doc-card__label">Aadhaar Card</span>
+            </div>
+            <div class="doc-card" data-doc="pan">
+              <span class="doc-card__icon">💳</span>
+              <span class="doc-card__label">PAN Card</span>
+            </div>
+            <div class="doc-card" data-doc="passport">
+              <span class="doc-card__icon">🛂</span>
+              <span class="doc-card__label">Passport</span>
+            </div>
+            <div class="doc-card" data-doc="voter">
+              <span class="doc-card__icon">🗳️</span>
+              <span class="doc-card__label">Voter ID</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Front Side</label>
+          <div class="upload-zone" id="uploadFront">
+            <div class="upload-zone__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <p class="upload-zone__text">Drag & drop or <strong>browse files</strong></p>
+            <p class="upload-zone__hint">JPG, PNG or PDF — Max 5 MB</p>
+            <input type="file" id="fileFront" accept="image/*,.pdf" />
+            <div class="upload-filename" id="fileNameFront">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="fileTextFront"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Back Side</label>
+          <div class="upload-zone" id="uploadBack">
+            <div class="upload-zone__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <p class="upload-zone__text">Drag & drop or <strong>browse files</strong></p>
+            <p class="upload-zone__hint">JPG, PNG or PDF — Max 5 MB</p>
+            <input type="file" id="fileBack" accept="image/*,.pdf" />
+            <div class="upload-filename" id="fileNameBack">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="fileTextBack"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="back2">← Back</button>
+          <button class="btn btn-primary" id="next2">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ STEP 3 — Selfie / Liveness ═══════════ -->
+      <div class="step-panel" id="panel3">
+        <h2 class="panel-title">Selfie Verification</h2>
+        <p class="panel-subtitle">We'll match your face with the uploaded document</p>
+
+        <div class="selfie-area" id="selfieArea">
+          <div class="selfie-area__placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="scan-line"></div>
+        </div>
+        <p class="selfie-status" id="selfieStatus">Position your face within the circle</p>
+
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Ensure good lighting, remove glasses/hats, and hold your device at eye level for best results.</p>
+        </div>
+
+        <button class="btn btn-primary" id="startScan" style="width:100%">
+          <span id="scanBtnText">📸 Start Verification</span>
+        </button>
+
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-secondary" id="back3">← Back</button>
+          <button class="btn btn-primary" id="next3" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ STEP 4 — Security Setup ═══════════ -->
+      <div class="step-panel" id="panel4">
+        <h2 class="panel-title">Security Setup</h2>
+        <p class="panel-subtitle">Create a secure PIN and configure protection layers</p>
+
+        <div class="form-group">
+          <label>Create 4-Digit Security PIN</label>
+          <div class="pin-inputs" id="pinCreate">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="c1" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="c2" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="c3" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="c4" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Security PIN</label>
+          <div class="pin-inputs" id="pinConfirm">
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="v1" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="v2" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="v3" />
+            <input type="password" class="pin-box" maxlength="1" inputmode="numeric" pattern="[0-9]" data-pin="v4" />
+          </div>
+          <p class="pin-match" id="pinMatch"></p>
+        </div>
+
+        <label style="font-size:.74rem;font-weight:500;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:10px">Additional Security</label>
+        <div class="security-option enabled" id="optBiometric">
+          <span class="security-option__icon">🔐</span>
+          <div class="security-option__info">
+            <div class="security-option__title">Biometric Login</div>
+            <div class="security-option__desc">Use fingerprint or face unlock</div>
+          </div>
+          <div class="toggle-switch on" data-toggle="biometric"></div>
+        </div>
+        <div class="security-option" id="optTxnAlert">
+          <span class="security-option__icon">🔔</span>
+          <div class="security-option__info">
+            <div class="security-option__title">Transaction Alerts</div>
+            <div class="security-option__desc">Instant notifications for every transaction</div>
+          </div>
+          <div class="toggle-switch" data-toggle="txnalert"></div>
+        </div>
+        <div class="security-option" id="optBlock">
+          <span class="security-option__icon">🛡️</span>
+          <div class="security-option__info">
+            <div class="security-option__title">AI Fraud Shield</div>
+            <div class="security-option__desc">Neural network detects & blocks suspicious activity</div>
+          </div>
+          <div class="toggle-switch" data-toggle="aishield"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="back4">← Back</button>
+          <button class="btn btn-primary" id="next4">Complete Verification ✓</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ STEP 5 — Success ═══════════ -->
+      <div class="step-panel" id="panel5">
+        <div class="success-container">
+          <div class="success-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h2 class="success-title">Verification Complete!</h2>
+          <p class="success-subtitle">Your identity has been verified and your account is now fully secured with PayGuard Neural's AI protection.</p>
+          <div class="verified-badges">
+            <div class="v-badge">✓ KYC Verified</div>
+            <div class="v-badge">✓ ID Matched</div>
+            <div class="v-badge">✓ Face Verified</div>
+            <div class="v-badge">✓ PIN Secured</div>
+          </div>
+          <button class="btn btn-success" style="width:100%" id="goToDashboard">Go to Dashboard →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ── Neural Canvas (same as login) ─────────────── */
+    (()=>{
+      const c=document.getElementById('neuralCanvas'),x=c.getContext('2d');let w,h,pts=[],mouse={x:null,y:null};
+      const N=70,MD=130;
+      function resize(){w=c.width=innerWidth;h=c.height=innerHeight}
+      addEventListener('resize',resize);resize();
+      class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.45;this.vy=(Math.random()-.5)*.45;this.r=Math.random()*1.8+.8;this.hue=Math.random()>.5?255:190}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1}draw(){x.beginPath();x.arc(this.x,this.y,this.r,0,Math.PI*2);x.fillStyle=this.hue===255?'rgba(155,125,255,.5)':'rgba(0,212,255,.4)';x.fill()}}
+      for(let i=0;i<N;i++)pts.push(new P());
+      addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+      addEventListener('mouseleave',()=>{mouse.x=null;mouse.y=null});
+      function anim(){x.clearRect(0,0,w,h);pts.forEach(p=>{p.update();p.draw()});
+        for(let i=0;i<pts.length;i++){for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<MD){const a=(1-d/MD)*.12;x.beginPath();x.moveTo(pts[i].x,pts[i].y);x.lineTo(pts[j].x,pts[j].y);x.strokeStyle=`rgba(124,92,252,${a})`;x.lineWidth=.5;x.stroke()}}
+          if(mouse.x!==null){const dx=pts[i].x-mouse.x,dy=pts[i].y-mouse.y,d=Math.sqrt(dx*dx+dy*dy);if(d<180){const a=(1-d/180)*.2;x.beginPath();x.moveTo(pts[i].x,pts[i].y);x.lineTo(mouse.x,mouse.y);x.strokeStyle=`rgba(0,212,255,${a})`;x.lineWidth=.4;x.stroke()}}}
+        requestAnimationFrame(anim)}
+      anim();
+    })();
+
+    /* ── Step Navigation Engine ─────────────────────── */
+    let currentStep = 1;
+    const totalSteps = 4;
+    const nodes = document.querySelectorAll('.step-node');
+    const conns = document.querySelectorAll('.step-connector');
+    const labels = document.querySelectorAll('.step-label');
+
+    function goToStep(n) {
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById('panel' + n);
+      if (target) { target.classList.add('active'); }
+
+      nodes.forEach((nd, i) => {
+        const s = i + 1;
+        nd.classList.remove('active', 'done');
+        labels[i].classList.remove('active', 'done');
+        if (s < n)      { nd.classList.add('done'); labels[i].classList.add('done'); }
+        else if (s === n){ nd.classList.add('active'); labels[i].classList.add('active'); }
+      });
+      conns.forEach((cn, i) => {
+        cn.classList.toggle('done', i + 1 < n);
+      });
+      currentStep = n;
+    }
+
+    /* ── Step 1 — Personal ─────────────────────────── */
+    document.getElementById('next1').addEventListener('click', () => {
+      const fields = ['fullName','dob','gender','pan','address','city','pincode'];
+      let valid = true;
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) { valid = false; el.style.borderColor = 'var(--danger)'; setTimeout(() => el.style.borderColor = '', 1500); }
+      });
+      if (valid) goToStep(2);
+    });
+
+    /* ── Step 2 — Document ─────────────────────────── */
+    // Document type selection
+    document.querySelectorAll('.doc-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      });
+    });
+
+    // Upload zones
+    function setupUpload(zoneId, fileInputId, nameId, textId) {
+      const zone = document.getElementById(zoneId);
+      const inp = document.getElementById(fileInputId);
+      const nameEl = document.getElementById(nameId);
+      const textEl = document.getElementById(textId);
+
+      zone.addEventListener('click', () => inp.click());
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+      zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragging'); handleFile(e.dataTransfer.files[0]); });
+      inp.addEventListener('change', () => { if (inp.files[0]) handleFile(inp.files[0]); });
+
+      function handleFile(file) {
+        zone.classList.add('uploaded');
+        nameEl.classList.add('show');
+        textEl.textContent = file.name;
+      }
+    }
+    setupUpload('uploadFront', 'fileFront', 'fileNameFront', 'fileTextFront');
+    setupUpload('uploadBack', 'fileBack', 'fileNameBack', 'fileTextBack');
+
+    document.getElementById('back2').addEventListener('click', () => goToStep(1));
+    document.getElementById('next2').addEventListener('click', () => goToStep(3));
+
+    /* ── Step 3 — Selfie ───────────────────────────── */
+    const selfieArea = document.getElementById('selfieArea');
+    const selfieStatus = document.getElementById('selfieStatus');
+    const startScan = document.getElementById('startScan');
+    const scanBtnText = document.getElementById('scanBtnText');
+    const next3 = document.getElementById('next3');
+
+    startScan.addEventListener('click', () => {
+      selfieArea.classList.add('scanning');
+      selfieStatus.textContent = 'Scanning face…';
+      selfieStatus.className = 'selfie-status';
+      scanBtnText.textContent = '⏳ Scanning…';
+      startScan.disabled = true;
+
+      setTimeout(() => {
+        selfieStatus.textContent = 'Matching with document…';
+      }, 1400);
+
+      setTimeout(() => {
+        selfieStatus.textContent = 'Analyzing liveness…';
+      }, 2600);
+
+      setTimeout(() => {
+        selfieArea.classList.remove('scanning');
+        selfieArea.classList.add('verified');
+        selfieStatus.textContent = '✓ Face verified successfully';
+        selfieStatus.className = 'selfie-status success';
+        scanBtnText.textContent = '✓ Verified';
+        startScan.style.background = 'linear-gradient(135deg,#00e89d,#00b87c)';
+        next3.disabled = false;
+      }, 3800);
+    });
+
+    document.getElementById('back3').addEventListener('click', () => {
+      selfieArea.classList.remove('scanning', 'verified');
+      selfieStatus.textContent = 'Position your face within the circle';
+      selfieStatus.className = 'selfie-status';
+      scanBtnText.textContent = '📸 Start Verification';
+      startScan.disabled = false;
+      startScan.style.background = '';
+      next3.disabled = true;
+      goToStep(2);
+    });
+    next3.addEventListener('click', () => goToStep(4));
+
+    /* ── Step 4 — Security PIN ─────────────────────── */
+    function setupPinGroup(containerId) {
+      const boxes = document.getElementById(containerId).querySelectorAll('.pin-box');
+      boxes.forEach((b, i) => {
+        b.addEventListener('input', () => {
+          b.value = b.value.replace(/\D/g, '');
+          if (b.value && i < boxes.length - 1) boxes[i + 1].focus();
+          b.classList.toggle('filled', !!b.value);
+          checkPinMatch();
+        });
+        b.addEventListener('keydown', e => {
+          if (e.key === 'Backspace' && !b.value && i > 0) boxes[i - 1].focus();
+        });
+      });
+    }
+    setupPinGroup('pinCreate');
+    setupPinGroup('pinConfirm');
+
+    function getPin(containerId) {
+      return Array.from(document.getElementById(containerId).querySelectorAll('.pin-box')).map(b => b.value).join('');
+    }
+    function checkPinMatch() {
+      const c = getPin('pinCreate'), v = getPin('pinConfirm'), el = document.getElementById('pinMatch');
+      if (c.length === 4 && v.length === 4) {
+        if (c === v) { el.textContent = '✓ PINs match'; el.className = 'pin-match match'; }
+        else { el.textContent = '✗ PINs do not match'; el.className = 'pin-match error'; }
+      } else { el.textContent = ''; el.className = 'pin-match'; }
+    }
+
+    // Toggle switches
+    document.querySelectorAll('.toggle-switch').forEach(ts => {
+      ts.addEventListener('click', () => {
+        ts.classList.toggle('on');
+        ts.closest('.security-option').classList.toggle('enabled', ts.classList.contains('on'));
+      });
+    });
+
+    document.getElementById('back4').addEventListener('click', () => goToStep(3));
+    document.getElementById('next4').addEventListener('click', () => {
+      const c = getPin('pinCreate'), v = getPin('pinConfirm');
+      if (c.length < 4) { document.getElementById('pinMatch').textContent = 'Please enter a 4-digit PIN'; document.getElementById('pinMatch').className = 'pin-match error'; return; }
+      if (c !== v) { document.getElementById('pinMatch').textContent = '✗ PINs do not match'; document.getElementById('pinMatch').className = 'pin-match error'; return; }
+
+      // Complete — hide stepper, show success
+      document.getElementById('stepper').style.display = 'none';
+      document.getElementById('stepLabels').style.display = 'none';
+      goToStep(5);
+    });
+
+    /* ── Dashboard redirect (demo) ─────────────────── */
+    document.getElementById('goToDashboard').addEventListener('click', () => {
+      alert('Redirecting to PayGuard Neural Dashboard…');
+    });
+  </script>
+</body>
+</html>
