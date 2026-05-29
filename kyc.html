@@ -91,6 +91,12 @@
     .brand-mini__text{font-family:'Outfit',sans-serif;font-size:1.15rem;font-weight:700;
       background:linear-gradient(135deg,#e0d8ff,#9b7dff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
     }
+    .brand-mini__back{
+      margin-left:auto;font-size:.78rem;color:var(--text-muted);text-decoration:none;
+      display:flex;align-items:center;gap:5px;transition:color .3s;font-weight:500;
+    }
+    .brand-mini__back:hover{color:var(--accent-glow)}
+    .brand-mini__back svg{width:14px;height:14px}
 
     /* ── Progress Stepper ───────────────────────────── */
     .stepper{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:30px;position:relative}
@@ -319,6 +325,10 @@
       <div class="brand-mini">
         <div class="brand-mini__icon"><img src="logo.png" alt="PayGuard Neural" /></div>
         <span class="brand-mini__text">PayGuard Neural</span>
+        <a href="index.html" class="brand-mini__back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to Login
+        </a>
       </div>
 
       <!-- Stepper -->
@@ -770,9 +780,9 @@
       goToStep(5);
     });
 
-    /* ── Dashboard redirect (demo) ─────────────────── */
+    /* ── Dashboard redirect ─────────────────────────── */
     document.getElementById('goToDashboard').addEventListener('click', () => {
-      alert('Redirecting to PayGuard Neural Dashboard…');
+      window.location.href = 'index.html';
     });
   </script>
 </body>

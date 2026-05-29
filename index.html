@@ -539,7 +539,7 @@
 
       <!-- Footer -->
       <div class="login-footer">
-        Don't have an account? <a href="#" id="signupLink">Create one</a>
+        Don't have an account? <a href="kyc.html" id="signupLink">Create one</a>
       </div>
 
     </div>
@@ -658,7 +658,7 @@
       setTimeout(() => ripple.remove(), 600);
     });
 
-    /* ── Form Submit (Demo) ────────────────────────── */
+    /* ── Form Submit → Redirect to KYC ─────────────── */
     document.getElementById('loginForm').addEventListener('submit', e => {
       e.preventDefault();
       const btn = document.getElementById('loginBtn');
@@ -677,11 +677,10 @@
         btn.style.background = 'linear-gradient(135deg, #00e89d 0%, #00b87c 100%)';
         btn.style.opacity = '1';
 
+        /* Redirect to KYC & Security page after brief success animation */
         setTimeout(() => {
-          text.textContent = 'Sign In';
-          btn.style.background = '';
-          btn.disabled = false;
-        }, 2000);
+          window.location.href = 'kyc.html';
+        }, 1200);
       }, 1800);
     });
   </script>
