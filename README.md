@@ -4,13 +4,6 @@
 
 ### AI-Powered Pre-Transaction Fraud Detection System
 
-[![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38BDF8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
-[![Claude API](https://img.shields.io/badge/Claude_API-Anthropic-D97706?style=flat-square)](https://anthropic.com/)
-[![Blockchain](https://img.shields.io/badge/Blockchain-Fraud_Registry-6D28D9?style=flat-square)]()
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-In_Development-orange?style=flat-square)]()
-
 > *Inspired by real frozen-account UPI fraud cases observed during Cyber Forensic Internship at Nagpur Cyber Police Station.*
 
 </div>
@@ -187,7 +180,7 @@ mapping(string => FraudRecord[]) public fraudHistory;
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 ```bash
@@ -260,15 +253,15 @@ Each flagged transaction generates a tamper-proof evidence bundle:
 
 This project was conceived during my internship at the **Nagpur Cyber Police Station** as a Cyber Forensic Intern, where I directly worked on:
 
-- 📱 APK static malware analysis
-- 📹 CCTV footage forensics
-- 💳 UPI fraud investigation & digital evidence handling
+-  APK static malware analysis
+-  CCTV footage forensics
+-  UPI fraud investigation & digital evidence handling
 
 I witnessed firsthand how victims discover fraud only *after* the transaction — when accounts are frozen and recovery is nearly impossible. PayGuard-Neural is my attempt to shift the intervention point from **post-fraud recovery** to **pre-fraud prevention**.
 
 ---
 
-## 📊 Roadmap
+##  Roadmap
 
 - [x] Project architecture design
 - [x] Risk scoring algorithm design
@@ -296,7 +289,7 @@ This is a capstone project currently in active development. Contributions, sugge
 
 ---
 
-## 👩‍💻 Author
+##  Author
 
 **Vaishnavi Trivedi**
 B.Tech Cybersecurity | GHRCE Nagpur
