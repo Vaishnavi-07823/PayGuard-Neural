@@ -4,7 +4,6 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 
 const router = express.Router();
-
 // Helper function to generate JWT
 const generateToken = (userId) => {
   return jwt.sign(
