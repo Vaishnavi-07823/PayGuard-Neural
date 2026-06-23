@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayGuard Neural — KYC &amp; Security Verification</title>
+    <meta
+      name="description"
+      content="Complete your identity verification and security setup to activate your PayGuard Neural account."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+     rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+    <canvas id="neuralCanvas"></canvas>
+
+    <div class="kyc-wrapper">
+      <div class="kyc-card">
+        <!-- Brand Mini -->
+        <div class="brand-mini">
+          <div class="brand-mini__icon">
+            <img src="logo.png" alt="PayGuard Neural" />
+          </div>
+          <span class="brand-mini__text">PayGuard Neural</span>
+          <a href="index.html" class="brand-mini__back">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to Login
+          </a>
+        </div>
+
+        <!-- Stepper -->
+        <div class="stepper" id="stepper">
+          <div class="step-node active" data-step="1">
+            <span class="step-num">1</span>
+            <svg
+              class="check-svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div class="step-connector" data-conn="1"></div>
+          <div class="step-node" data-step="2">
+            <span class="step-num">2</span>
+            <svg
+              class="check-svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div class="step-connector" data-conn="2"></div>
+          <div class="step-node" data-step="3">
+            <span class="step-num">3</span>
+            <svg
+              class="check-svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div class="step-connector" data-conn="3"></div>
+          <div class="step-node" data-step="4">
+            <span class="step-num">4</span>
+            <svg
+              class="check-svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </div>
+        <div class="step-labels" id="stepLabels">
+          <span class="step-label active">Personal</span>
+          <span class="step-label">Identity</span>
+          <span class="step-label">Selfie</span>
+          <span class="step-label">Security</span>
+        </div>
+
+        <!-- ═══════════ STEP 1 — Personal Details ═══════════ -->
+        <div class="step-panel active" id="panel1">
+          <h2 class="panel-title">Personal Information</h2>
+          <p class="panel-subtitle">
+            Provide your details as per your government ID
+          </p>
+
+          <div class="info-box">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <p>
+              Your data is encrypted end-to-end and used solely for
+              verification. We comply with RBI guidelines and data protection
+              laws.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="fullName">Full Legal Name</label>
+            <input
+              class="input-field"
+              type="text"
+              id="fullName"
+              placeholder="As shown on your Aadhaar / PAN"
+              required
+            />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input class="input-field" type="date" id="dob" required />
+            </div>
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select class="input-field" id="gender" required>
+                <option value="" disabled selected>Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="pan">PAN Number</label>
+            <input
+              class="input-field"
+              type="text"
+              id="pan"
+              placeholder="ABCDE1234F"
+              maxlength="10"
+              style="text-transform: uppercase"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="address">Residential Address</label>
+            <input
+              class="input-field"
+              type="text"
+              id="address"
+              placeholder="House / Street / Locality"
+              required
+            />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input
+                class="input-field"
+                type="text"
+                id="city"
+                placeholder="City"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="pincode">PIN Code</label>
+              <input
+                class="input-field"
+                type="text"
+                id="pincode"
+                placeholder="6-digit"
+                maxlength="6"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="next1">Continue →</button>
+          </div>
+        </div>
+
+        <!-- ═══════════ STEP 2 — Identity Verification ═══════════ -->
+        <div class="step-panel" id="panel2">
+          <h2 class="panel-title">Identity Verification</h2>
+          <p class="panel-subtitle">
+            Choose a government-issued ID and upload a clear photo
+          </p>
+
+          <div class="form-group">
+            <label>Select Document Type</label>
+            <div class="doc-options" id="docOptions">
+              <div class="doc-card selected" data-doc="aadhaar">
+                <span class="doc-card__icon">🪪</span>
+                <span class="doc-card__label">Aadhaar Card</span>
+              </div>
+              <div class="doc-card" data-doc="pan">
+                <span class="doc-card__icon">💳</span>
+                <span class="doc-card__label">PAN Card</span>
+              </div>
+              <div class="doc-card" data-doc="passport">
+                <span class="doc-card__icon">🛂</span>
+                <span class="doc-card__label">Passport</span>
+              </div>
+              <div class="doc-card" data-doc="voter">
+                <span class="doc-card__icon">🗳️</span>
+                <span class="doc-card__label">Voter ID</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Upload Front Side</label>
+            <div class="upload-zone" id="uploadFront">
+              <div class="upload-zone__icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <p class="upload-zone__text">
+                Drag & drop or <strong>browse files</strong>
+              </p>
+              <p class="upload-zone__hint">JPG, PNG or PDF — Max 5 MB</p>
+              <input type="file" id="fileFront" accept="image/*,.pdf" />
+              <div class="upload-filename" id="fileNameFront">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span id="fileTextFront"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Upload Back Side</label>
+            <div class="upload-zone" id="uploadBack">
+              <div class="upload-zone__icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <p class="upload-zone__text">
+                Drag & drop or <strong>browse files</strong>
+              </p>
+              <p class="upload-zone__hint">JPG, PNG or PDF — Max 5 MB</p>
+              <input type="file" id="fileBack" accept="image/*,.pdf" />
+              <div class="upload-filename" id="fileNameBack">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span id="fileTextBack"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="back2">← Back</button>
+            <button class="btn btn-primary" id="next2">Continue →</button>
+          </div>
+        </div>
+
+        <!-- ═══════════ STEP 3 — Selfie / Liveness ═══════════ -->
+        <div class="step-panel" id="panel3">
+          <h2 class="panel-title">Selfie Verification</h2>
+          <p class="panel-subtitle">
+            We'll match your face with the uploaded document
+          </p>
+
+          <div class="selfie-area" id="selfieArea">
+            <div class="selfie-area__placeholder">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <div class="scan-line"></div>
+          </div>
+          <p class="selfie-status" id="selfieStatus">
+            Position your face within the circle
+          </p>
+
+          <div class="info-box">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <p>
+              Ensure good lighting, remove glasses/hats, and hold your device at
+              eye level for best results.
+            </p>
+          </div>
+
+          <button class="btn btn-primary" id="startScan" style="width: 100%">
+            <span id="scanBtnText">📸 Start Verification</span>
+          </button>
+
+          <div class="btn-row" style="margin-top: 12px">
+            <button class="btn btn-secondary" id="back3">← Back</button>
+            <button class="btn btn-primary" id="next3" disabled>
+              Continue →
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══════════ STEP 4 — Security Setup ═══════════ -->
+        <div class="step-panel" id="panel4">
+          <h2 class="panel-title">Security Setup</h2>
+          <p class="panel-subtitle">
+            Create a secure PIN and configure protection layers
+          </p>
+
+          <div class="form-group">
+            <label>Create 4-Digit Security PIN</label>
+            <div class="pin-inputs" id="pinCreate">
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="c1"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="c2"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="c3"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="c4"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Security PIN</label>
+            <div class="pin-inputs" id="pinConfirm">
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="v1"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="v2"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="v3"
+              />
+              <input
+                type="password"
+                class="pin-box"
+                maxlength="1"
+                inputmode="numeric"
+                pattern="[0-9]"
+                data-pin="v4"
+              />
+            </div>
+            <p class="pin-match" id="pinMatch"></p>
+          </div>
+
+          <label
+            style="
+              font-size: 0.74rem;
+              font-weight: 500;
+              color: var(--text-secondary);
+              letter-spacing: 0.04em;
+              text-transform: uppercase;
+              display: block;
+              margin-bottom: 10px;
+            "
+            >Additional Security</label
+          >
+          <div class="security-option enabled" id="optBiometric">
+            <span class="security-option__icon">🔐</span>
+            <div class="security-option__info">
+              <div class="security-option__title">Biometric Login</div>
+              <div class="security-option__desc">
+                Use fingerprint or face unlock
+              </div>
+            </div>
+            <div class="toggle-switch on" data-toggle="biometric"></div>
+          </div>
+          <div class="security-option" id="optTxnAlert">
+            <span class="security-option__icon">🔔</span>
+            <div class="security-option__info">
+              <div class="security-option__title">Transaction Alerts</div>
+              <div class="security-option__desc">
+                Instant notifications for every transaction
+              </div>
+            </div>
+            <div class="toggle-switch" data-toggle="txnalert"></div>
+          </div>
+          <div class="security-option" id="optBlock">
+            <span class="security-option__icon">🛡️</span>
+            <div class="security-option__info">
+              <div class="security-option__title">AI Fraud Shield</div>
+              <div class="security-option__desc">
+                Neural network detects & blocks suspicious activity
+              </div>
+            </div>
+            <div class="toggle-switch" data-toggle="aishield"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="back4">← Back</button>
+            <button class="btn btn-primary" id="next4">
+              Complete Verification ✓
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══════════ STEP 5 — Success ═══════════ -->
+        <div class="step-panel" id="panel5">
+          <div class="success-container">
+            <div class="success-circle">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 class="success-title">Verification Complete!</h2>
+            <p class="success-subtitle">
+              Your identity has been verified and your account is now fully
+              secured with PayGuard Neural's AI protection.
+            </p>
+            <div class="verified-badges">
+              <div class="v-badge">✓ KYC Verified</div>
+              <div class="v-badge">✓ ID Matched</div>
+              <div class="v-badge">✓ Face Verified</div>
+              <div class="v-badge">✓ PIN Secured</div>
+            </div>
+            <button
+              class="btn btn-success"
+              style="width: 100%"
+              id="goToDashboard"
+            >
+              Go to Dashboard →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ── Neural Canvas (same as login) ─────────────── */
+      (() => {
+        const c = document.getElementById("neuralCanvas"),
+          x = c.getContext("2d");
+        let w,
+          h,
+          pts = [],
+          mouse = { x: null, y: null };
+        const N = 70,
+          MD = 130;
+        function resize() {
+          w = c.width = innerWidth;
+          h = c.height = innerHeight;
+        }
+        addEventListener("resize", resize);
+        resize();
+        class P {
+          constructor() {
+            this.reset();
+          }
+          reset() {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.vx = (Math.random() - 0.5) * 0.45;
+            this.vy = (Math.random() - 0.5) * 0.45;
+            this.r = Math.random() * 1.8 + 0.8;
+            this.hue = Math.random() > 0.5 ? 255 : 190;
+          }
+          update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > w) this.vx *= -1;
+            if (this.y < 0 || this.y > h) this.vy *= -1;
+          }
+          draw() {
+            x.beginPath();
+            x.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            x.fillStyle =
+              this.hue === 255 ? "rgba(155,125,255,.5)" : "rgba(0,212,255,.4)";
+            x.fill();
+          }
+        }
+        for (let i = 0; i < N; i++) pts.push(new P());
+        addEventListener("mousemove", (e) => {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+        });
+        addEventListener("mouseleave", () => {
+          mouse.x = null;
+          mouse.y = null;
+        });
+        function anim() {
+          x.clearRect(0, 0, w, h);
+          pts.forEach((p) => {
+            p.update();
+            p.draw();
+          });
+          for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+              const dx = pts[i].x - pts[j].x,
+                dy = pts[i].y - pts[j].y,
+                d = Math.sqrt(dx * dx + dy * dy);
+              if (d < MD) {
+                const a = (1 - d / MD) * 0.12;
+                x.beginPath();
+                x.moveTo(pts[i].x, pts[i].y);
+                x.lineTo(pts[j].x, pts[j].y);
+                x.strokeStyle = `rgba(124,92,252,${a})`;
+                x.lineWidth = 0.5;
+                x.stroke();
+              }
+            }
+            if (mouse.x !== null) {
+              const dx = pts[i].x - mouse.x,
+                dy = pts[i].y - mouse.y,
+                d = Math.sqrt(dx * dx + dy * dy);
+              if (d < 180) {
+                const a = (1 - d / 180) * 0.2;
+                x.beginPath();
+                x.moveTo(pts[i].x, pts[i].y);
+                x.lineTo(mouse.x, mouse.y);
+                x.strokeStyle = `rgba(0,212,255,${a})`;
+                x.lineWidth = 0.4;
+                x.stroke();
+              }
+            }
+          }
+          requestAnimationFrame(anim);
+        }
+        anim();
+      })();
+
+      /* ── Step Navigation Engine ─────────────────────── */
+      let currentStep = 1;
+      const totalSteps = 4;
+      const nodes = document.querySelectorAll(".step-node");
+      const conns = document.querySelectorAll(".step-connector");
+      const labels = document.querySelectorAll(".step-label");
+
+      function goToStep(n) {
+        document
+          .querySelectorAll(".step-panel")
+          .forEach((p) => p.classList.remove("active"));
+        const target = document.getElementById("panel" + n);
+        if (target) {
+          target.classList.add("active");
+        }
+
+        nodes.forEach((nd, i) => {
+          const s = i + 1;
+          nd.classList.remove("active", "done");
+          labels[i].classList.remove("active", "done");
+          if (s < n) {
+            nd.classList.add("done");
+            labels[i].classList.add("done");
+          } else if (s === n) {
+            nd.classList.add("active");
+            labels[i].classList.add("active");
+          }
+        });
+        conns.forEach((cn, i) => {
+          cn.classList.toggle("done", i + 1 < n);
+        });
+        currentStep = n;
+      }
+
+      /* ── Step 1 — Personal ─────────────────────────── */
+      document.getElementById("next1").addEventListener("click", () => {
+        const fields = [
+          "fullName",
+          "dob",
+          "gender",
+          "pan",
+          "address",
+          "city",
+          "pincode",
+        ];
+        let valid = true;
+        fields.forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el.value.trim()) {
+            valid = false;
+            el.style.borderColor = "var(--danger)";
+            setTimeout(() => (el.style.borderColor = ""), 1500);
+          }
+        });
+        if (valid) goToStep(2);
+      });
+
+      /* ── Step 2 — Document ─────────────────────────── */
+      // Document type selection
+      document.querySelectorAll(".doc-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          document
+            .querySelectorAll(".doc-card")
+            .forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+        });
+      });
+
+      // Upload zones
+      function setupUpload(zoneId, fileInputId, nameId, textId) {
+        const zone = document.getElementById(zoneId);
+        const inp = document.getElementById(fileInputId);
+        const nameEl = document.getElementById(nameId);
+        const textEl = document.getElementById(textId);
+
+        zone.addEventListener("click", () => inp.click());
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("dragging");
+        });
+        zone.addEventListener("dragleave", () =>
+          zone.classList.remove("dragging"),
+        );
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("dragging");
+          handleFile(e.dataTransfer.files[0]);
+        });
+        inp.addEventListener("change", () => {
+          if (inp.files[0]) handleFile(inp.files[0]);
+        });
+
+        function handleFile(file) {
+          zone.classList.add("uploaded");
+          nameEl.classList.add("show");
+          textEl.textContent = file.name;
+        }
+      }
+      setupUpload("uploadFront", "fileFront", "fileNameFront", "fileTextFront");
+      setupUpload("uploadBack", "fileBack", "fileNameBack", "fileTextBack");
+
+      document
+        .getElementById("back2")
+        .addEventListener("click", () => goToStep(1));
+      document
+        .getElementById("next2")
+        .addEventListener("click", () => goToStep(3));
+
+      /* ── Step 3 — Selfie ───────────────────────────── */
+      const selfieArea = document.getElementById("selfieArea");
+      const selfieStatus = document.getElementById("selfieStatus");
+      const startScan = document.getElementById("startScan");
+      const scanBtnText = document.getElementById("scanBtnText");
+      const next3 = document.getElementById("next3");
+
+      startScan.addEventListener("click", () => {
+        selfieArea.classList.add("scanning");
+        selfieStatus.textContent = "Scanning face…";
+        selfieStatus.className = "selfie-status";
+        scanBtnText.textContent = "⏳ Scanning…";
+        startScan.disabled = true;
+
+        setTimeout(() => {
+          selfieStatus.textContent = "Matching with document…";
+        }, 1400);
+
+        setTimeout(() => {
+          selfieStatus.textContent = "Analyzing liveness…";
+        }, 2600);
+
+        setTimeout(() => {
+          selfieArea.classList.remove("scanning");
+          selfieArea.classList.add("verified");
+          selfieStatus.textContent = "✓ Face verified successfully";
+          selfieStatus.className = "selfie-status success";
+          scanBtnText.textContent = "✓ Verified";
+          startScan.style.background =
+            "linear-gradient(135deg,#00e89d,#00b87c)";
+          next3.disabled = false;
+        }, 3800);
+      });
+
+      document.getElementById("back3").addEventListener("click", () => {
+        selfieArea.classList.remove("scanning", "verified");
+        selfieStatus.textContent = "Position your face within the circle";
+        selfieStatus.className = "selfie-status";
+        scanBtnText.textContent = "📸 Start Verification";
+        startScan.disabled = false;
+        startScan.style.background = "";
+        next3.disabled = true;
+        goToStep(2);
+      });
+      next3.addEventListener("click", () => goToStep(4));
+
+      /* ── Step 4 — Security PIN ─────────────────────── */
+      function setupPinGroup(containerId) {
+        const boxes = document
+          .getElementById(containerId)
+          .querySelectorAll(".pin-box");
+        boxes.forEach((b, i) => {
+          b.addEventListener("input", () => {
+            b.value = b.value.replace(/\D/g, "");
+            if (b.value && i < boxes.length - 1) boxes[i + 1].focus();
+            b.classList.toggle("filled", !!b.value);
+            checkPinMatch();
+          });
+          b.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !b.value && i > 0)
+              boxes[i - 1].focus();
+          });
+        });
+      }
+      setupPinGroup("pinCreate");
+      setupPinGroup("pinConfirm");
+
+      function getPin(containerId) {
+        return Array.from(
+          document.getElementById(containerId).querySelectorAll(".pin-box"),
+        )
+          .map((b) => b.value)
+          .join("");
+      }
+      function checkPinMatch() {
+        const c = getPin("pinCreate"),
+          v = getPin("pinConfirm"),
+          el = document.getElementById("pinMatch");
+        if (c.length === 4 && v.length === 4) {
+          if (c === v) {
+            el.textContent = "✓ PINs match";
+            el.className = "pin-match match";
+          } else {
+            el.textContent = "✗ PINs do not match";
+            el.className = "pin-match error";
+          }
+        } else {
+          el.textContent = "";
+          el.className = "pin-match";
+        }
+      }
+
+      // Toggle switches
+      document.querySelectorAll(".toggle-switch").forEach((ts) => {
+        ts.addEventListener("click", () => {
+          ts.classList.toggle("on");
+          ts.closest(".security-option").classList.toggle(
+            "enabled",
+            ts.classList.contains("on"),
+          );
+        });
+      });
+
+      document
+        .getElementById("back4")
+        .addEventListener("click", () => goToStep(3));
+      document.getElementById("next4").addEventListener("click", () => {
+        const c = getPin("pinCreate"),
+          v = getPin("pinConfirm");
+        if (c.length < 4) {
+          document.getElementById("pinMatch").textContent =
+            "Please enter a 4-digit PIN";
+          document.getElementById("pinMatch").className = "pin-match error";
+          return;
+        }
+        if (c !== v) {
+          document.getElementById("pinMatch").textContent =
+            "✗ PINs do not match";
+          document.getElementById("pinMatch").className = "pin-match error";
+          return;
+        }
+
+        // Complete — hide stepper, show success
+        document.getElementById("stepper").style.display = "none";
+        document.getElementById("stepLabels").style.display = "none";
+        goToStep(5);
+      });
+
+      /* ── Dashboard redirect ─────────────────────────── */
+      document.getElementById("goToDashboard").addEventListener("click", () => {
+        window.location.href = "index.html";
+      });
+    </script>
+  </body>
+</html>

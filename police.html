@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PayGuard-Neural — Investigation Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-dark:#3C3489;--purple-light:#EEEDFE;--purple-border:#AFA9EC;
+  --teal:#0F6E56;--teal-light:#E1F5EE;--teal-border:#5DCAA5;
+  --text:#1A1A2E;--text-muted:#666;--text-faint:#999;
+  --bg:#fff;--bg2:#F8F8FC;--border:#E4E4F0;
+  --red-bg:#FCEBEB;--red:#A32D2D;--red-fill:#E24B4A;
+  --yellow-bg:#FAEEDA;--yellow:#854F0B;--yellow-fill:#EF9F27;
+  --green-bg:#EAF3DE;--green:#3B6D11;--green-fill:#639922;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg2);line-height:1.6}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+.logo{font-size:16px;font-weight:600}.logo span{color:var(--purple)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-badge{font-size:12px;padding:4px 12px;border-radius:20px;background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-border);font-weight:500}
+.nav-user{font-size:13px;color:var(--text-muted)}
+.btn-sm{padding:6px 14px;border-radius:7px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text)}
+.btn-sm:hover{background:var(--bg2)}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg);border-right:1px solid var(--border);padding:20px 0}
+.sidebar-section{padding:0 16px;margin-bottom:24px}
+.sidebar-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;padding:0 8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:14px;color:var(--text-muted);cursor:pointer;transition:all .15s;margin-bottom:2px}
+.sidebar-item:hover{background:var(--bg2);color:var(--text)}
+.sidebar-item.active{background:var(--purple-light);color:var(--purple);font-weight:500}
+.sidebar-item .icon{font-size:16px;width:20px;text-align:center}
+.sidebar-stats{margin:0 16px;padding:14px;border-radius:10px;background:var(--teal-light);border:1px solid var(--teal-border)}
+.sidebar-stats p{font-size:12px;color:var(--teal);line-height:1.5}
+.sidebar-stats strong{font-size:18px;display:block;color:var(--teal);font-weight:700}
+
+/* MAIN */
+.main{padding:24px;overflow-y:auto}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px}
+
+/* CASE FORM */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .tag{font-size:11px;padding:2px 10px;border-radius:20px;background:var(--purple-light);color:var(--purple);font-weight:500}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:500;color:var(--text-muted)}
+.field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--bg);outline:none;transition:border .2s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple)}
+.field textarea{resize:vertical;min-height:70px}
+.upi-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.upi-entry{display:flex;gap:8px;align-items:center}
+.upi-entry input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--bg);outline:none}
+.upi-entry input:focus{border-color:var(--purple)}
+.upi-role{padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-muted);background:var(--bg);outline:none;cursor:pointer}
+.btn-add-upi{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--purple);cursor:pointer;background:none;border:none;padding:4px 0;font-family:inherit}
+.btn-add-upi:hover{opacity:.7}
+.btn-row{display:flex;gap:10px;margin-top:16px}
+.btn-primary{padding:10px 24px;border-radius:8px;background:var(--purple);color:#fff;border:none;font-size:14px;cursor:pointer;font-weight:500;transition:background .2s}
+.btn-primary:hover{background:var(--purple-dark)}
+.btn-secondary{padding:10px 24px;border-radius:8px;background:transparent;color:var(--text);border:1px solid var(--border);font-size:14px;cursor:pointer}
+.btn-secondary:hover{background:var(--bg2)}
+.btn-teal{padding:10px 24px;border-radius:8px;background:var(--teal);color:#fff;border:none;font-size:14px;cursor:pointer;font-weight:500}
+.btn-teal:hover{opacity:.9}
+.btn-danger{padding:10px 24px;border-radius:8px;background:transparent;color:var(--red);border:1px solid var(--red);font-size:14px;cursor:pointer}
+
+/* RESULTS */
+.hidden{display:none}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.score-card{padding:16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);text-align:center}
+.score-card .upi-id{font-size:11px;color:var(--text-faint);margin-bottom:6px;word-break:break-all}
+.score-card .role-tag{font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:8px;display:inline-block;font-weight:600}
+.score-card .big-score{font-size:28px;font-weight:700;line-height:1}
+.score-card .risk-label{font-size:12px;font-weight:500;margin-top:4px}
+
+/* CHAIN VISUAL */
+.chain-visual{display:flex;align-items:center;gap:0;overflow-x:auto;padding:20px 0;margin-bottom:16px}
+.chain-node{display:flex;flex-direction:column;align-items:center;min-width:110px}
+.chain-box{padding:10px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg);text-align:center;min-width:90px}
+.chain-box.source{border-color:var(--red-fill);background:var(--red-bg)}
+.chain-box.middle{border-color:var(--yellow-fill);background:var(--yellow-bg)}
+.chain-box.destination{border-color:var(--green-fill);background:var(--green-bg)}
+.chain-box .c-upi{font-size:11px;font-weight:600;word-break:break-all}
+.chain-box .c-role{font-size:10px;color:var(--text-muted);margin-top:2px}
+.chain-box .c-score{font-size:16px;font-weight:700;margin-top:4px}
+.chain-arrow{font-size:20px;color:var(--text-faint);padding:0 4px;flex-shrink:0}
+.chain-label{font-size:10px;color:var(--text-faint);margin-top:6px;text-align:center}
+
+/* FACTORS TABLE */
+.factors-table{width:100%;border-collapse:collapse;font-size:13px}
+.factors-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);border-bottom:1px solid var(--border)}
+.factors-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.factors-table tr:last-child td{border-bottom:none}
+.factors-table tr:hover td{background:var(--bg2)}
+.pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.pill-red{background:var(--red-bg);color:var(--red)}
+.pill-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.pill-green{background:var(--green-bg);color:var(--green)}
+
+/* AI BOX */
+.ai-box{padding:14px 16px;border-radius:10px;background:var(--purple-light);border:1px solid var(--purple-border);margin-bottom:16px}
+.ai-label{font-size:11px;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.ai-text{font-size:13px;color:var(--text);line-height:1.7}
+
+/* EVIDENCE */
+.evidence-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.evidence-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.evidence-row:last-child{border-bottom:none}
+.evidence-key{color:var(--text-muted);font-size:12px}
+.evidence-val{font-family:monospace;font-size:12px;color:var(--text);word-break:break-all;max-width:300px;text-align:right}
+
+/* CASES LIST */
+.cases-list{display:flex;flex-direction:column;gap:10px}
+.case-item{padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border .15s}
+.case-item:hover{border-color:var(--purple)}
+.case-left h4{font-size:14px;font-weight:500;margin-bottom:3px}
+.case-left p{font-size:12px;color:var(--text-muted)}
+.case-status{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:500}
+.status-open{background:var(--red-bg);color:var(--red)}
+.status-progress{background:var(--yellow-bg);color:var(--yellow)}
+.status-closed{background:var(--green-bg);color:var(--green)}
+
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">PayGuard<span>-Neural</span></span>
+  <div class="nav-right">
+    <span class="nav-badge">&#x1F6E1; Law Enforcement</span>
+    <span class="nav-user">Off. Vaishnavi Trivedi</span>
+    <button class="btn-sm" onclick="window.location.href='index.html'">&#x2190; Home</button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Investigation</div>
+      <div class="sidebar-item active" onclick="showTab('new-case')">
+        <span class="icon">&#x1F4CB;</span> New case
+      </div>
+      <div class="sidebar-item" onclick="showTab('cases')">
+        <span class="icon">&#x1F4C2;</span> All cases
+      </div>
+      <div class="sidebar-item" onclick="showTab('chain')">
+        <span class="icon">&#x26D3;</span> Chain tracer
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tools</div>
+      <div class="sidebar-item" onclick="showTab('apk')">
+        <span class="icon">&#x1F4F1;</span> APK analyser
+      </div>
+      <div class="sidebar-item" onclick="showTab('evidence')">
+        <span class="icon">&#x1F4C4;</span> Evidence export
+      </div>
+    </div>
+    <div style="padding:0 16px;margin-top:8px">
+      <div class="sidebar-stats">
+        <p>Cases this month</p>
+        <strong>23</strong>
+        <p style="margin-top:6px">Fraud chains traced</p>
+        <strong>8</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- NEW CASE TAB -->
+    <div id="tab-new-case">
+      <div class="page-title">New investigation</div>
+      <div class="page-sub">Enter case details and UPI IDs to begin fraud chain analysis</div>
+
+      <div class="card">
+        <div class="card-title">Case details <span class="tag">Step 1</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>Case / FIR number</label>
+            <input type="text" id="case-num" placeholder="e.g. FIR/2026/NCP/0042"/>
+          </div>
+          <div class="field">
+            <label>Complaint date</label>
+            <input type="date" id="case-date"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Complainant name</label>
+            <input type="text" id="complainant" placeholder="Full name"/>
+          </div>
+          <div class="field">
+            <label>Amount defrauded (₹)</label>
+            <input type="number" id="amount" placeholder="e.g. 15000"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Brief description</label>
+          <textarea id="description" placeholder="How the fraud occurred — online scam, fake seller, impersonation, etc."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">UPI IDs involved <span class="tag">Step 2</span></div>
+        <div class="upi-list" id="upi-list">
+          <div class="upi-entry">
+            <input type="text" placeholder="UPI ID  e.g. suspect1@okicici"/>
+            <select class="upi-role">
+              <option>Suspect</option>
+              <option>Mule account</option>
+              <option>Victim</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="upi-entry">
+            <input type="text" placeholder="UPI ID  e.g. mule1@paytm"/>
+            <select class="upi-role">
+              <option>Mule account</option>
+              <option>Suspect</option>
+              <option>Victim</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="upi-entry">
+            <input type="text" placeholder="UPI ID  e.g. victim@ybl"/>
+            <select class="upi-role">
+              <option>Victim</option>
+              <option>Suspect</option>
+              <option>Mule account</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-add-upi" onclick="addUPIField()">+ Add another UPI ID</button>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="runAnalysis()">&#x1F50D; Analyse fraud chain</button>
+          <button class="btn-secondary" onclick="clearForm()">Clear</button>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="results" class="hidden">
+
+        <div class="card">
+          <div class="card-title">Risk scores <span class="tag">Results</span></div>
+          <div class="score-grid" id="score-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Fraud chain trace <span class="tag">Blockchain</span></div>
+          <div class="chain-visual" id="chain-visual"></div>
+          <p style="font-size:12px;color:var(--text-faint)">Chain traced using immutable blockchain registry. Arrow direction = money flow.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Factor breakdown <span class="tag">Analysis</span></div>
+          <table class="factors-table">
+            <thead>
+              <tr>
+                <th>UPI ID</th>
+                <th>Role</th>
+                <th>Account age</th>
+                <th>Reports</th>
+                <th>Chain link</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody id="factors-body"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AI investigation summary <span class="tag">Claude AI</span></div>
+          <div class="ai-box">
+            <div class="ai-label">&#x1F916; AI Analysis</div>
+            <div class="ai-text" id="ai-summary"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Evidence record <span class="tag">SHA-256 verified</span></div>
+          <div class="evidence-box" id="evidence-box"></div>
+          <div class="btn-row">
+            <button class="btn-teal" onclick="exportEvidence()">&#x2B07; Export evidence PDF</button>
+            <button class="btn-secondary" onclick="copyHash()">&#x1F4CB; Copy hash</button>
+            <button class="btn-danger" onclick="flagAllUPI()">&#x1F6A8; Flag all UPI IDs</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CASES TAB -->
+    <div id="tab-cases" class="hidden">
+      <div class="page-title">All cases</div>
+      <div class="page-sub">Investigation history at Nagpur Cyber Police Station</div>
+      <div class="card">
+        <div class="cases-list">
+          <div class="case-item">
+            <div class="case-left">
+              <h4>FIR/2026/NCP/0041 — Online investment scam</h4>
+              <p>Complainant: Ramesh Sharma · ₹85,000 defrauded · 3 UPI IDs</p>
+            </div>
+            <span class="case-status status-open">Open</span>
+          </div>
+          <div class="case-item">
+            <div class="case-left">
+              <h4>FIR/2026/NCP/0038 — Fake seller fraud</h4>
+              <p>Complainant: Priya Mehta · ₹12,500 defrauded · 2 UPI IDs</p>
+            </div>
+            <span class="case-status status-progress">In progress</span>
+          </div>
+          <div class="case-item">
+            <div class="case-left">
+              <h4>FIR/2026/NCP/0034 — KYC update scam</h4>
+              <p>Complainant: Suresh Patel · ₹32,000 defrauded · 4 UPI IDs</p>
+            </div>
+            <span class="case-status status-closed">Closed</span>
+          </div>
+          <div class="case-item">
+            <div class="case-left">
+              <h4>FIR/2026/NCP/0029 — Impersonation fraud</h4>
+              <p>Complainant: Anita Desai · ₹9,800 defrauded · 2 UPI IDs</p>
+            </div>
+            <span class="case-status status-closed">Closed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAIN TRACER TAB -->
+    <div id="tab-chain" class="hidden">
+      <div class="page-title">Blockchain chain tracer</div>
+      <div class="page-sub">Trace how fraud money moved across UPI accounts</div>
+      <div class="card">
+        <div class="card-title">Enter UPI IDs to trace</div>
+        <div class="field" style="margin-bottom:12px">
+          <label>UPI IDs (one per line)</label>
+          <textarea placeholder="suspect@okicici&#10;mule1@paytm&#10;mule2@ybl&#10;cashout@airtel" style="min-height:100px"></textarea>
+        </div>
+        <button class="btn-primary">&#x26D3; Trace chain</button>
+      </div>
+    </div>
+
+    <!-- APK ANALYSER TAB -->
+    <div id="tab-apk" class="hidden">
+      <div class="page-title">APK static analyser</div>
+      <div class="page-sub">Upload a suspicious APK for static analysis — permissions, endpoints, hardcoded strings</div>
+      <div class="card">
+        <div style="border:2px dashed var(--border);border-radius:10px;padding:40px;text-align:center;cursor:pointer" onclick="document.getElementById('apk-upload').click()">
+          <div style="font-size:32px;margin-bottom:10px">&#x1F4F1;</div>
+          <p style="font-size:14px;font-weight:500;margin-bottom:4px">Drop APK file here</p>
+          <p style="font-size:13px;color:var(--text-muted)">or click to browse · Max 50MB</p>
+          <input type="file" id="apk-upload" accept=".apk" style="display:none"/>
+        </div>
+        <div style="margin-top:16px;padding:14px;border-radius:10px;background:var(--purple-light);border:1px solid var(--purple-border)">
+          <p style="font-size:13px;color:var(--purple)">&#x2139;&#xFE0F; Analyser checks: permissions, hardcoded URLs/IPs, suspicious API calls, obfuscated code patterns, certificate info. Uses jadx + apktool pipeline.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVIDENCE TAB -->
+    <div id="tab-evidence" class="hidden">
+      <div class="page-title">Evidence export</div>
+      <div class="page-sub">SHA-256 verified evidence records ready for court submission</div>
+      <div class="card">
+        <div class="cases-list">
+          <div class="case-item" style="justify-content:space-between">
+            <div class="case-left">
+              <h4>EVD-2026-0041 — Investment scam chain</h4>
+              <p>Generated: Jun 12, 2026 · Hash: 3a7f9c2e...</p>
+            </div>
+            <button class="btn-teal" style="font-size:12px;padding:6px 14px;border-radius:7px;white-space:nowrap">&#x2B07; Download PDF</button>
+          </div>
+          <div class="case-item" style="justify-content:space-between">
+            <div class="case-left">
+              <h4>EVD-2026-0038 — Fake seller evidence</h4>
+              <p>Generated: Jun 10, 2026 · Hash: b84d1f6a...</p>
+            </div>
+            <button class="btn-teal" style="font-size:12px;padding:6px 14px;border-radius:7px;white-space:nowrap">&#x2B07; Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function addUPIField() {
+  const list = document.getElementById('upi-list');
+  const div = document.createElement('div');
+  div.className = 'upi-entry';
+  div.innerHTML = `<input type="text" placeholder="UPI ID"/><select class="upi-role"><option>Unknown</option><option>Suspect</option><option>Mule account</option><option>Victim</option></select>`;
+  list.appendChild(div);
+}
+
+function clearForm() {
+  document.getElementById('case-num').value = '';
+  document.getElementById('complainant').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('results').classList.add('hidden');
+}
+
+const mockData = [
+  {upi:'suspect1@okicici', role:'Suspect', score:12, age:'8 days', reports:'9', chain:'Origin', risk:'high'},
+  {upi:'mule1@paytm', role:'Mule account', score:31, age:'22 days', reports:'3', chain:'Linked', risk:'high'},
+  {upi:'victim@ybl', role:'Victim', score:88, age:'2 yrs', reports:'0', chain:'None', risk:'safe'},
+];
+
+function runAnalysis() {
+  const entries = document.querySelectorAll('.upi-entry input');
+  const upiIds = Array.from(entries).map(e => e.value.trim()).filter(v => v);
+  if (upiIds.length === 0) { alert('Please enter at least one UPI ID'); return; }
+
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+
+  // Score cards
+  const grid = document.getElementById('score-grid');
+  grid.innerHTML = '';
+  mockData.forEach(d => {
+    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'medium' ? 'var(--yellow)' : 'var(--green)';
+    const bg = d.risk === 'high' ? 'var(--red-bg)' : d.risk === 'medium' ? 'var(--yellow-bg)' : 'var(--green-bg)';
+    const label = d.risk === 'high' ? 'High risk' : d.risk === 'medium' ? 'Caution' : 'Safe';
+    const roleColor = d.role === 'Suspect' ? 'var(--red)' : d.role === 'Mule account' ? 'var(--yellow)' : 'var(--green)';
+    const roleBg = d.role === 'Suspect' ? 'var(--red-bg)' : d.role === 'Mule account' ? 'var(--yellow-bg)' : 'var(--green-bg)';
+    grid.innerHTML += `<div class="score-card">
+      <div class="upi-id">${d.upi}</div>
+      <span class="role-tag" style="background:${roleBg};color:${roleColor}">${d.role}</span>
+      <div class="big-score" style="color:${col}">${d.score}</div>
+      <div class="risk-label" style="color:${col}">${label}</div>
+    </div>`;
+  });
+
+  // Chain visual
+  const chain = document.getElementById('chain-visual');
+  const classes = ['source','middle','destination'];
+  const labels = ['Origin account','Mule / relay','Victim account'];
+  chain.innerHTML = '';
+  mockData.forEach((d, i) => {
+    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'medium' ? 'var(--yellow)' : 'var(--green)';
+    chain.innerHTML += `<div class="chain-node">
+      <div class="chain-box ${classes[i]}">
+        <div class="c-upi">${d.upi}</div>
+        <div class="c-role">${d.role}</div>
+        <div class="c-score" style="color:${col}">${d.score}/100</div>
+      </div>
+      <div class="chain-label">${labels[i]}</div>
+    </div>`;
+    if (i < mockData.length - 1) chain.innerHTML += `<div class="chain-arrow">&#x2192;</div>`;
+  });
+
+  // Factors table
+  const tbody = document.getElementById('factors-body');
+  tbody.innerHTML = '';
+  mockData.forEach(d => {
+    const pillClass = d.risk === 'high' ? 'pill-red' : d.risk === 'medium' ? 'pill-yellow' : 'pill-green';
+    const pillLabel = d.risk === 'high' ? 'High' : d.risk === 'medium' ? 'Caution' : 'Safe';
+    tbody.innerHTML += `<tr>
+      <td style="font-family:monospace;font-size:12px">${d.upi}</td>
+      <td>${d.role}</td>
+      <td>${d.age}</td>
+      <td>${d.reports} reports</td>
+      <td>${d.chain}</td>
+      <td><span class="pill ${pillClass}">${pillLabel}</span></td>
+    </tr>`;
+  });
+
+  // AI summary
+  document.getElementById('ai-summary').textContent = 'Analysis shows a classic 3-node UPI fraud chain. The origin account (suspect1@okicici) was created 8 days ago — consistent with burner account behavior seen in advance fee and investment scam patterns. Funds moved to mule1@paytm (relay account with 3 prior reports) before reaching the suspect\'s withdrawal point. The victim\'s account (victim@ybl) has a clean 2-year history confirming innocent mule account freezing risk. Recommend immediate freezing of the origin and relay accounts and filing for blockchain evidence export.';
+
+  // Evidence
+  const hash = Array.from({length:64}, () => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+  const now = new Date().toISOString();
+  document.getElementById('evidence-box').innerHTML = `
+    <div class="evidence-row"><span class="evidence-key">Case number</span><span class="evidence-val">${document.getElementById('case-num').value || 'FIR/2026/NCP/DRAFT'}</span></div>
+    <div class="evidence-row"><span class="evidence-key">Generated at</span><span class="evidence-val">${now}</span></div>
+    <div class="evidence-row"><span class="evidence-key">UPI IDs analysed</span><span class="evidence-val">${mockData.map(d=>d.upi).join(', ')}</span></div>
+    <div class="evidence-row"><span class="evidence-key">SHA-256 hash</span><span class="evidence-val" id="ev-hash">${hash}</span></div>
+    <div class="evidence-row"><span class="evidence-key">Verified by</span><span class="evidence-val">PayGuard-Neural Blockchain Registry v1.0</span></div>
+  `;
+}
+
+function exportEvidence() {
+  alert('Evidence PDF export ready.\n\nIn the full backend version, this generates a SHA-256 verified PDF signed with the officer\'s credentials — ready for court submission.');
+}
+
+function copyHash() {
+  const hash = document.getElementById('ev-hash')?.textContent;
+  if (hash) { navigator.clipboard.writeText(hash); alert('Hash copied to clipboard!'); }
+}
+
+function flagAllUPI() {
+  alert('All 3 UPI IDs have been flagged in the community fraud database.\nOther PayGuard-Neural users will now see a HIGH RISK warning for these IDs.');
+}
+</script>
+</body>
+</html>

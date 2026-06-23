@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="google-site-verification" content="xxxxx" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayGuard Neural — Secure Login</title>
+  <meta name="description" content="Log in to PayGuard Neural — AI-powered payment security for the modern world." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:    #06060f;
+      --bg-card:    rgba(15, 14, 35, 0.55);
+      --glass-border: rgba(120, 100, 255, 0.15);
+      --accent:     #7c5cfc;
+      --accent-glow:#9b7dff;
+      --accent-2:   #00d4ff;
+      --text-primary:   #eae8ff;
+      --text-secondary: #9994c4;
+      --text-muted:     #5e577e;
+      --input-bg:   rgba(22, 20, 50, 0.7);
+      --input-border: rgba(120, 100, 255, 0.2);
+      --danger:     #ff5c7c;
+      --success:    #00e89d;
+      --radius-lg:  20px;
+      --radius-md:  14px;
+      --radius-sm:  10px;
+    }
+  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PayGuard-Neural — Know before you pay</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --purple:#534AB7;
+    --purple-dark:#3C3489;
+    --purple-light:#EEEDFE;
+    --purple-border:#AFA9EC;
+    --text:#1A1A2E;
+    --text-muted:#666;
+    --text-faint:#999;
+    --bg:#ffffff;
+    --bg2:#F8F8FC;
+    --border:#E4E4F0;
+    --red-bg:#FCEBEB;--red:#A32D2D;--red-fill:#E24B4A;
+    --yellow-bg:#FAEEDA;--yellow:#854F0B;--yellow-fill:#EF9F27;
+    --green-bg:#EAF3DE;--green:#3B6D11;--green-fill:#639922;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg);line-height:1.6}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+  .logo{font-size:17px;font-weight:600;letter-spacing:-0.3px}.logo span{color:var(--purple)}
+  .nav-links{display:flex;align-items:center;gap:24px}
+  .nav-links a{font-size:14px;color:var(--text-muted);text-decoration:none;cursor:pointer;transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .btn-nav{padding:8px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{border-color:var(--purple);color:var(--purple)}
+  .btn-filled{background:var(--purple);border:1px solid var(--purple);color:#fff;margin-left:6px}
+  .btn-filled:hover{background:var(--purple-dark)}
+
+  /* HERO */
+  .hero{text-align:center;padding:80px 24px 60px;background:var(--bg)}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 14px;border-radius:20px;background:var(--purple-light);color:var(--purple-dark);border:1px solid var(--purple-border);margin-bottom:24px;font-weight:500}
+  .hero h1{font-size:44px;font-weight:700;line-height:1.15;letter-spacing:-1px;margin-bottom:18px;max-width:640px;margin-left:auto;margin-right:auto}
+  .hero h1 .accent{color:var(--purple)}
+  .hero p{font-size:17px;color:var(--text-muted);max-width:480px;margin:0 auto 36px;line-height:1.7}
+  .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-lg{padding:13px 32px;border-radius:10px;font-size:15px;cursor:pointer;font-weight:500;transition:all .2s}
+  .btn-lg-primary{background:var(--purple);color:#fff;border:1px solid var(--purple)}
+  .btn-lg-primary:hover{background:var(--purple-dark)}
+  .btn-lg-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn-lg-secondary:hover{border-color:var(--purple);color:var(--purple)}
+
+  /* TRUST BAR */
+  .trust{display:flex;justify-content:center;gap:32px;padding:24px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap}
+  .trust-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+  .trust-dot{width:6px;height:6px;border-radius:50%;background:var(--green-fill);flex-shrink:0}
+
+  /* DEMO */
+  .demo-section{padding:64px 24px;max-width:600px;margin:0 auto}
+  .section-eyebrow{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--purple);margin-bottom:10px}
+  .section-title{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}
+  .section-sub{font-size:15px;color:var(--text-muted);margin-bottom:28px}
+  .demo-card{border:1px solid var(--border);border-radius:14px;padding:24px;background:var(--bg)}
+  .demo-label{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500}
+  .demo-row{display:flex;gap:10px;margin-bottom:18px}
+  .demo-row input{flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
+  .demo-row input:focus{border-color:var(--purple)}
+  .demo-row button{padding:11px 20px;border-radius:8px;background:var(--purple);color:#fff;border:none;font-size:14px;cursor:pointer;font-weight:500;white-space:nowrap;transition:background .2s}
+  .demo-row button:hover{background:var(--purple-dark)}
+  .meter{height:8px;border-radius:4px;background:var(--bg2);margin-bottom:14px;overflow:hidden}
+  .meter-fill{height:100%;border-radius:4px;width:0%;transition:width .6s ease,background .4s}
+  .result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .result-score{font-size:24px;font-weight:700;color:var(--text-muted);transition:color .4s}
+  .result-pill{font-size:12px;padding:4px 14px;border-radius:20px;font-weight:600;background:var(--bg2);color:var(--text-muted)}
+  .result-ai{font-size:13px;color:var(--text-muted);line-height:1.6;min-height:20px}
+  .hint{font-size:12px;color:var(--text-faint);margin-top:12px}
+
+  /* FEATURES */
+  .features-section{padding:64px 32px;background:var(--bg2)}
+  .features-inner{max-width:900px;margin:0 auto}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:36px}
+  .feat{padding:20px;border-radius:12px;background:var(--bg);border:1px solid var(--border)}
+  .feat-icon{font-size:22px;color:var(--purple);margin-bottom:12px}
+  .feat h4{font-size:14px;font-weight:600;margin-bottom:6px}
+  .feat p{font-size:13px;color:var(--text-muted);line-height:1.6}
+
+  /* HOW IT WORKS */
+  .how-section{padding:64px 32px}
+  .how-inner{max-width:560px;margin:0 auto}
+  .steps{margin-top:32px;display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--border)}
+  .step:last-child{border-bottom:none}
+  .step-num{width:32px;height:32px;border-radius:50%;background:var(--purple-light);color:var(--purple-dark);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:2px}
+  .step h4{font-size:15px;font-weight:600;margin-bottom:4px}
+  .step p{font-size:14px;color:var(--text-muted);line-height:1.6}
+
+  /* STATS */
+  .stats-section{background:var(--purple);padding:48px 32px}
+  .stats-inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;text-align:center}
+  .stat-num{font-size:32px;font-weight:700;color:#fff;line-height:1}
+  .stat-lbl{font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px}
+
+  /* FOR BOTH */
+  .both-section{padding:64px 32px;background:var(--bg2)}
+  .both-inner{max-width:780px;margin:0 auto}
+  .both-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+  .both-card{padding:24px;border-radius:14px;border:1px solid var(--border);background:var(--bg)}
+  .both-card.police{border-color:var(--purple-border);background:var(--purple-light)}
+  .both-tag{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--purple);margin-bottom:12px}
+  .both-tag.teal{color:#0F6E56}
+  .both-card h4{font-size:16px;font-weight:600;margin-bottom:8px}
+  .both-card p{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px}
+  .both-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .both-list li{font-size:13px;color:var(--text-muted);padding-left:16px;position:relative}
+  .both-list li::before{content:'→';position:absolute;left:0;color:var(--purple);font-size:12px}
+
+  /* CTA */
+  .cta-section{padding:80px 32px;text-align:center}
+  .cta-section h2{font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px}
+  .cta-section p{font-size:15px;color:var(--text-muted);margin-bottom:32px;line-height:1.7}
+  .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* FOOTER */
+  footer{padding:24px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .footer-left{font-size:13px;color:var(--text-muted)}.footer-left span{font-weight:600;color:var(--purple)}
+  .footer-right{font-size:12px;color:var(--text-faint)}
+
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+  .logo{font-size:17px;font-weight:600;letter-spacing:-0.3px}.logo span{color:var(--purple)}
+  .nav-links{display:flex;align-items:center;gap:24px}
+  .nav-links a{font-size:14px;color:var(--text-muted);text-decoration:none;cursor:pointer;transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .btn-nav{padding:8px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{border-color:var(--purple);color:var(--purple)}
+  .btn-filled{background:var(--purple);border:1px solid var(--purple);color:#fff;margin-left:6px}
+  .btn-filled:hover{background:var(--purple-dark)}
+
+
+  /* HERO */
+  .hero{text-align:center;padding:80px 24px 60px;background:var(--bg)}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 14px;border-radius:20px;background:var(--purple-light);color:var(--purple-dark);border:1px solid var(--purple-border);margin-bottom:24px;font-weight:500}
+  .hero h1{font-size:44px;font-weight:700;line-height:1.15;letter-spacing:-1px;margin-bottom:18px;max-width:640px;margin-left:auto;margin-right:auto}
+  .hero h1 .accent{color:var(--purple)}
+  .hero p{font-size:17px;color:var(--text-muted);max-width:480px;margin:0 auto 36px;line-height:1.7}
+  .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-lg{padding:13px 32px;border-radius:10px;font-size:15px;cursor:pointer;font-weight:500;transition:all .2s}
+  .btn-lg-primary{background:var(--purple);color:#fff;border:1px solid var(--purple)}
+  .btn-lg-primary:hover{background:var(--purple-dark)}
+  .btn-lg-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn-lg-secondary:hover{border-color:var(--purple);color:var(--purple)}
+
+  /* TRUST BAR */
+  .trust{display:flex;justify-content:center;gap:32px;padding:24px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap}
+  .trust-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+  .trust-dot{width:6px;height:6px;border-radius:50%;background:var(--green-fill);flex-shrink:0}
+
+  /* DEMO */
+  .demo-section{padding:64px 24px;max-width:600px;margin:0 auto}
+  .section-eyebrow{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--purple);margin-bottom:10px}
+  .section-title{font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}
+  .section-sub{font-size:15px;color:var(--text-muted);margin-bottom:28px}
+  .demo-card{border:1px solid var(--border);border-radius:14px;padding:24px;background:var(--bg)}
+  .demo-label{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500}
+  .demo-row{display:flex;gap:10px;margin-bottom:18px}
+  .demo-row input{flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
+  .demo-row input:focus{border-color:var(--purple)}
+  .demo-row button{padding:11px 20px;border-radius:8px;background:var(--purple);color:#fff;border:none;font-size:14px;cursor:pointer;font-weight:500;white-space:nowrap;transition:background .2s}
+  .demo-row button:hover{background:var(--purple-dark)}
+  .meter{height:8px;border-radius:4px;background:var(--bg2);margin-bottom:14px;overflow:hidden}
+  .meter-fill{height:100%;border-radius:4px;width:0%;transition:width .6s ease,background .4s}
+  .result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .result-score{font-size:24px;font-weight:700;color:var(--text-muted);transition:color .4s}
+  .result-pill{font-size:12px;padding:4px 14px;border-radius:20px;font-weight:600;background:var(--bg2);color:var(--text-muted)}
+  .result-ai{font-size:13px;color:var(--text-muted);line-height:1.6;min-height:20px}
+  .hint{font-size:12px;color:var(--text-faint);margin-top:12px}
+
+  /* FEATURES */
+  .features-section{padding:64px 32px;background:var(--bg2)}
+  .features-inner{max-width:900px;margin:0 auto}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:36px}
+  .feat{padding:20px;border-radius:12px;background:var(--bg);border:1px solid var(--border)}
+  .feat-icon{font-size:22px;color:var(--purple);margin-bottom:12px}
+  .feat h4{font-size:14px;font-weight:600;margin-bottom:6px}
+  .feat p{font-size:13px;color:var(--text-muted);line-height:1.6}
+
+  /* HOW IT WORKS */
+  .how-section{padding:64px 32px}
+  .how-inner{max-width:560px;margin:0 auto}
+  .steps{margin-top:32px;display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:18px;padding:20px 0;border-bottom:1px solid var(--border)}
+  .step:last-child{border-bottom:none}
+  .step-num{width:32px;height:32px;border-radius:50%;background:var(--purple-light);color:var(--purple-dark);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:2px}
+  .step h4{font-size:15px;font-weight:600;margin-bottom:4px}
+  .step p{font-size:14px;color:var(--text-muted);line-height:1.6}
+
+  /* STATS */
+  .stats-section{background:var(--purple);padding:48px 32px}
+  .stats-inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;text-align:center}
+  .stat-num{font-size:32px;font-weight:700;color:#fff;line-height:1}
+  .stat-lbl{font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px}
+
+  /* FOR BOTH */
+  .both-section{padding:64px 32px;background:var(--bg2)}
+  .both-inner{max-width:780px;margin:0 auto}
+  .both-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+  .both-card{padding:24px;border-radius:14px;border:1px solid var(--border);background:var(--bg)}
+  .both-card.police{border-color:var(--purple-border);background:var(--purple-light)}
+  .both-tag{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--purple);margin-bottom:12px}
+  .both-tag.teal{color:#0F6E56}
+  .both-card h4{font-size:16px;font-weight:600;margin-bottom:8px}
+  .both-card p{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px}
+  .both-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .both-list li{font-size:13px;color:var(--text-muted);padding-left:16px;position:relative}
+  .both-list li::before{content:'→';position:absolute;left:0;color:var(--purple);font-size:12px}
+
+  /* CTA */
+  .cta-section{padding:80px 32px;text-align:center}
+  .cta-section h2{font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px}
+  .cta-section p{font-size:15px;color:var(--text-muted);margin-bottom:32px;line-height:1.7}
+  .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* FOOTER */
+  footer{padding:24px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .footer-left{font-size:13px;color:var(--text-muted)}.footer-left span{font-weight:600;color:var(--purple)}
+  .footer-right{font-size:12px;color:var(--text-faint)}
+
+
+  @media(max-width:600px){
+    .hero h1{font-size:30px}
+    .stats-inner{grid-template-columns:1fr}
+    .both-grid{grid-template-columns:1fr}
+    nav{padding:0 16px}
+    .nav-links a{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <spaclass="logo">PayGuard<span>-Neural</span></span>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#who">For who</a>
+    <button class="btn-nav btn-outline" onclick="window.location.href='login.html'">Log in</button>
+    <button class="btn-nav btn-filled" onclick="window.location.href='register.html'">Get started free</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">&#x2713; Built on real Nagpur Cyber Police cases</div>
+  <h1>Know if a UPI payment is safe<br><span class="accent">before you send money</span></h1>
+  <p>PayGuard-Neural scores every UPI transaction 0–100 before it happens — using ML, community reports, and a blockchain fraud registry.</p>
+  <div class="hero-btns">
+    <button class="btn-lg btn-lg-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try it free ↓</button>
+    <button class="btn-lg btn-lg-secondary" onclick="window.location.href='register.html'">Create account</button>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust">
+  <div class="trust-item"><span class="trust-dot"></span>Validated on 50+ real fraud cases</div>
+  <div class="trust-item"><span class="trust-dot"></span>No app download needed</div>
+  <div class="trust-item"><span class="trust-dot"></span>Works with any UPI ID</div>
+  <div class="trust-item"><span class="trust-dot"></span>Law enforcement ready</div>
+</div>
+
+<!-- LIVE DEMO -->
+<section class="demo-section" id="demo">
+  <div class="section-eyebrow">Live demo</div>
+  <div class="section-title">Try it right now</div>
+  <div class="section-sub">Enter any UPI ID to see a sample risk check</div>
+  <div class="demo-card">
+    <div class="demo-label">UPI ID to check</div>
+    <div class="demo-row">
+      <input type="text" id="demo-input" placeholder="e.g. lucky99@upi or meera@paytm" />
+      <button onclick="runDemo()">Check now</button>
+    </div>
+    <div class="meter"><div class="meter-fill" id="demo-fill"></div></div>
+    <div class="result-row">
+      <span class="result-score" id="demo-score">--</span>
+      <span class="result-pill" id="demo-pill">Enter a UPI ID above</span>
+    </div>
+    <div class="result-ai" id="demo-ai"></div>
+    <div class="hint">Try: lucky99@upi (high risk) · newdeal@paytm (caution) · vaishnavi@okaxis (safe)</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="section-eyebrow">Features</div>
+    <div class="section-title">Four layers of protection</div>
+    <div class="section-sub">Every check runs all four in under 3 seconds</div>
+    <div class="features-grid">
+      <div class="feat">
+        <div class="feat-icon">&#x1F9E0;</div>
+        <h4>ML fraud scoring</h4>
+        <p>Scikit-learn model analyzes transaction patterns, UPI account age, and behavioral signals in real time.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x1F465;</div>
+        <h4>Community reports</h4>
+        <p>Crowdsourced fraud database. One report protects every user — Truecaller model for UPI fraud.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x26D3;</div>
+        <h4>Blockchain chain tracer</h4>
+        <p>Immutable ledger traces fraud money trails A→B→C→D. Used directly by cyber police for evidence.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x1F4CB;</div>
+        <h4>AI risk explanation</h4>
+        <p>Claude AI translates raw model output into plain language so anyone can understand the risk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-eyebrow">How it works</div>
+    <div class="section-title">Three steps, under 5 seconds</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h4>Enter the UPI ID</h4>
+          <p>Type the receiver's UPI ID before opening your payment app. No signup needed for a basic check.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h4>Get a safety score</h4>
+          <p>Our ML model checks fraud history, community reports, and the blockchain registry — all in under 3 seconds.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h4>Decide with confidence</h4>
+          <p>Red means stop. Yellow means verify first. Green means safe. AI tells you exactly why in plain language.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num">50+</div>
+      <div class="stat-lbl">Real fraud cases validated at Nagpur Cyber Police Station</div>
+    </div>
+    <div>
+      <div class="stat-num">0–100</div>
+      <div class="stat-lbl">Pre-transaction safety score before money moves</div>
+    </div>
+    <div>
+      <div class="stat-num">&lt;3s</div>
+      <div class="stat-lbl">Full risk check including blockchain registry lookup</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR WHO -->
+<section class="both-section" id="who">
+  <div class="both-inner">
+    <div class="section-eyebrow">Built for two users</div>
+    <div class="section-title">One system, two dashboards</div>
+    <div class="both-grid">
+      <div class="both-card">
+        <div class="both-tag">Regular user</div>
+        <h4>Protect your payments</h4>
+        <p>Check any UPI ID before sending money. Get a Red / Yellow / Green signal with AI explanation.</p>
+        <ul class="both-list">
+          <li>Pre-transaction risk score</li>
+          <li>Community fraud reports</li>
+          <li>Report suspicious UPI IDs</li>
+          <li>Check history dashboard</li>
+        </ul>
+      </div>
+      <div class="both-card police">
+        <div class="both-tag teal">Law enforcement</div>
+        <h4>Investigate fraud faster</h4>
+        <p>Trace full fraud chains, export evidence, and document cases — all in one investigation panel.</p>
+        <ul class="both-list">
+          <li>A→B→C→D chain tracer</li>
+          <li>SHA-256 evidence export</li>
+          <li>Case management system</li>
+          <li>APK static analysis</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Stop fraud before it happens</h2>
+  <p>Free to use. No app download. Built by a cybersecurity student,<br>validated on real cases at Nagpur Cyber Police Station.</p>
+  <div class="cta-btns">
+    <button class="btn-lg btn-lg-primary" onclick="window.location.href='register.html'">Create free account</button>
+    <button class="btn-lg btn-lg-secondary" onclick="window.location.href='login.html'">Already have an account</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left"><span>PayGuard-Neural</span> · Built by Vaishnavi Trivedi · CEH v13 · Nagpur Cyber Police Intern</div>
+  <div class="footer-right">github.com/Vaishnavi-07823/PayGuard-Neural</div>
+</footer>
+
+<script>
+const demos = {
+  high:{score:18,color:'#A32D2D',fill:'#E24B4A',label:'High risk',lbg:'#FCEBEB',lcol:'#A32D2D',ai:'This UPI ID was registered 11 days ago and has 14 community fraud reports. It appears in an active fraud chain traced by Nagpur Cyber Police. Do not send money.'},
+  mid:{score:54,color:'#854F0B',fill:'#EF9F27',label:'Caution',lbg:'#FAEEDA',lcol:'#854F0B',ai:'Limited account history with 2 unverified community reports. Transaction patterns look slightly unusual. Verify the receiver\'s identity before proceeding.'},
+  safe:{score:87,color:'#3B6D11',fill:'#639922',label:'Safe',lbg:'#EAF3DE',lcol:'#3B6D11',ai:'Clean history — no community fraud reports and no match in the blockchain fraud registry. Transaction patterns look normal. Safe to proceed.'}
+};
+
+function runDemo(){
+  const v = document.getElementById('demo-input').value.trim().toLowerCase();
+  if(!v) return;
+  let d = demos.safe;
+  if(v.includes('99')||v.includes('lucky')||v.includes('fast')||v.includes('win')) d = demos.high;
+  else if(v.includes('new')||v.includes('shop')||v.includes('deal')||v.includes('offer')) d = demos.mid;
+  document.getElementById('demo-score').textContent = d.score+'/100';
+  document.getElementById('demo-score').style.color = d.color;
+  document.getElementById('demo-fill').style.width = d.score+'%';
+  document.getElementById('demo-fill').style.background = d.fill;
+  const pill = document.getElementById('demo-pill');
+  pill.textContent = d.label;
+  pill.style.background = d.lbg;
+  pill.style.color = d.lcol;
+  document.getElementById('demo-ai').textContent = d.ai;
+}
+document.getElementById('demo-input').addEventListener('keydown', e=>{ if(e.key==='Enter') runDemo(); });
+</script>
+</body>
+</html>
