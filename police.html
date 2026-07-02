@@ -141,8 +141,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
   <span class="logo">PayGuard<span>-Neural</span></span>
   <div class="nav-right">
     <span class="nav-badge">&#x1F6E1; Law Enforcement</span>
-    <span class="nav-user">Off. Vaishnavi Trivedi</span>
-    <button class="btn-sm" onclick="window.location.href='index.html'">&#x2190; Home</button>
+    <span class="nav-user" id="nav-user">Loading...</span>
+    <button class="btn-sm" onclick="handleLogout()">Logout</button>
   </div>
 </nav>
 
@@ -403,7 +403,41 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
   </main>
 </div>
 
-<script>
+<script type="module">
+// ── Firebase Auth ──────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_aZZLulzIeee8ZEObGmZO05y0-1n8MTI",
+  authDomain: "payguard-neural.firebaseapp.com",
+  projectId: "payguard-neural",
+  storageBucket: "payguard-neural.firebasestorage.app",
+  messagingSenderId: "11883234406",
+  appId: "1:11883234406:web:9d10e337019ef8236799a7"
+};
+const _app = initializeApp(firebaseConfig);
+const auth = getAuth(_app);
+const db = getFirestore(_app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists() && snap.data().role !== 'officer') {
+      window.location.href = 'dashboard.html'; return;
+    }
+  } catch(e) {}
+  const el = document.getElementById('nav-user');
+  if (el) el.textContent = user.displayName || user.email;
+});
+
+window.handleLogout = async function() {
+  await signOut(auth);
+  window.location.href = 'login.html';
+};
+
 function showTab(name) {
   document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
   document.getElementById('tab-' + name).classList.remove('hidden');
