@@ -4,9 +4,9 @@
 
 > Built by Vaishnavi Trivedi — CEH v13 Certified | Cyber Forensic Intern, Nagpur Cyber Police Station
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://vaishnavi-07823.github.io/PayGuard-Neural/)
-[![GitHub](https://img.shields.io/badge/GitHub-Vaishnavi--07823-blue)](https://github.com/Vaishnavi-07823)
-[![CEH](https://img.shields.io/badge/CEH-v13%20Certified-red)](https://www.eccouncil.org/)
+![Live Demo](https://vaishnavi-07823.github.io/PayGuard-Neural/)
+![GitHub](https://github.com/Vaishnavi-07823)
+![CEH](https://www.eccouncil.org/)
 
 ---
 
