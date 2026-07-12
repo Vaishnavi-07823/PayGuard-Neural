@@ -78,7 +78,7 @@ def train_and_save_model():
         random_state=42, n_jobs=-1,
     )
     model.fit(X_train, y_train)
-    print("      ✓ Model trained successfully")
+    print("      OK Model trained successfully")
 
     print("\n[4/5] Evaluating on test set...")
     train_acc = model.score(X_train, y_train)
@@ -97,20 +97,20 @@ def train_and_save_model():
         proba = model.predict_proba([features])[0]
         score = round(proba[1] * 100, 1)
         if score >= 80:
-            label = "🟢 SAFE"
+            label = "[SAFE]"
         elif score >= 40:
-            label = "🟡 CAUTION"
+            label = "[CAUTION]"
         else:
-            label = "🔴 HIGH_RISK"
+            label = "[HIGH_RISK]"
         print(f"      {name}")
-        print(f"        → Score: {score}/100  {label}")
+        print(f"        -> Score: {score}/100  {label}")
 
     print("\n[5/5] Saving model...")
     model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, "model.pkl")
     joblib.dump(model, model_path)
-    print(f"      ✓ Saved to {model_path}")
+    print(f"      OK Saved to {model_path}")
 
     print("\n" + "=" * 60)
     print("  Training complete! You can now start the Flask server.")
