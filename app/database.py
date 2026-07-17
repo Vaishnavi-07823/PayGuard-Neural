@@ -19,13 +19,17 @@ client = None
 db = None
 
 def get_db():
-    """Returns the MongoDB database instance."""
+    """Returns the MongoDB database instance (lazy init)."""
     global client, db
     if db is None:
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-        # Extract DB name from URI or default to 'payguard_neural'
-        db_name = MONGO_URI.rsplit('/', 1)[-1].split('?')[0]
-        if not db_name or db_name == "localhost:27017":
+        # Extract DB name: last path segment before '?', default to payguard_neural
+        try:
+            path = MONGO_URI.split("@", 1)[-1]          # strip credentials
+            db_name = path.split("/", 1)[-1].split("?")[0]  # grab path segment
+            if not db_name:
+                db_name = "payguard_neural"
+        except Exception:
             db_name = "payguard_neural"
         db = client[db_name]
     return db
