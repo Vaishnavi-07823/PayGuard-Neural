@@ -173,11 +173,7 @@ def report_fraud():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"""
-    ╔═══════════════════════════════════════════════╗
-    ║   PayGuard-Neural Backend Started             ║
-    ║   Server: http://localhost:{port}                ║
-    ║   Open index.html at: http://localhost:{port}/   ║
-    ╚═══════════════════════════════════════════════╝
-    """)
+    print(f"PayGuard-Neural Backend Started")
+    print(f"  Server : http://localhost:{port}/")
+    print(f"  Health : http://localhost:{port}/api/health")
     app.run(host="0.0.0.0", port=port, debug=True)

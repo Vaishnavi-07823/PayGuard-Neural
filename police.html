@@ -461,27 +461,61 @@ function clearForm() {
   document.getElementById('results').classList.add('hidden');
 }
 
-const mockData = [
-  {upi:'suspect1@okicici', role:'Suspect', score:12, age:'8 days', reports:'9', chain:'Origin', risk:'high'},
-  {upi:'mule1@paytm', role:'Mule account', score:31, age:'22 days', reports:'3', chain:'Linked', risk:'high'},
-  {upi:'victim@ybl', role:'Victim', score:88, age:'2 yrs', reports:'0', chain:'None', risk:'safe'},
-];
+async function runAnalysis() {
+  const entries = document.querySelectorAll('.upi-entry');
+  const upiNodes = Array.from(entries).map(e => {
+    return {
+      upi: e.querySelector('input').value.trim(),
+      role: e.querySelector('.upi-role').value
+    };
+  }).filter(v => v.upi);
 
-function runAnalysis() {
-  const entries = document.querySelectorAll('.upi-entry input');
-  const upiIds = Array.from(entries).map(e => e.value.trim()).filter(v => v);
-  if (upiIds.length === 0) { alert('Please enter at least one UPI ID'); return; }
+  if (upiNodes.length === 0) { alert('Please enter at least one UPI ID'); return; }
 
   document.getElementById('results').classList.remove('hidden');
   document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  document.getElementById('ai-summary').textContent = 'Analyzing...';
+  
+  const apiData = [];
+  
+  for (const node of upiNodes) {
+    try {
+      const res = await fetch('/api/check-transaction', {
+        method: 'POST',
+        body: JSON.stringify({ upi_id: node.upi }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const breakdown = data.breakdown || {};
+        apiData.push({
+          upi: data.upi_id,
+          role: node.role,
+          score: Math.round(data.final_score),
+          risk: data.risk_level.toLowerCase().replace('_risk', ''),
+          age: breakdown.ml_result && breakdown.ml_result.features_used ? Math.round(breakdown.ml_result.features_used[0]) + ' days' : 'N/A',
+          reports: breakdown.db_result && breakdown.db_result.report_count ? breakdown.db_result.report_count : '0',
+          chain: breakdown.chain_score < 100 ? 'Linked' : 'None',
+          ai: data.explanation || 'No explanation.'
+        });
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  }
+  
+  if (apiData.length === 0) {
+    document.getElementById('ai-summary').textContent = 'Failed to analyze UPI IDs. Backend may be down.';
+    return;
+  }
 
   // Score cards
   const grid = document.getElementById('score-grid');
   grid.innerHTML = '';
-  mockData.forEach(d => {
-    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'medium' ? 'var(--yellow)' : 'var(--green)';
-    const bg = d.risk === 'high' ? 'var(--red-bg)' : d.risk === 'medium' ? 'var(--yellow-bg)' : 'var(--green-bg)';
-    const label = d.risk === 'high' ? 'High risk' : d.risk === 'medium' ? 'Caution' : 'Safe';
+  apiData.forEach(d => {
+    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'caution' ? 'var(--yellow)' : 'var(--green)';
+    const bg = d.risk === 'high' ? 'var(--red-bg)' : d.risk === 'caution' ? 'var(--yellow-bg)' : 'var(--green-bg)';
+    const label = d.risk === 'high' ? 'High risk' : d.risk === 'caution' ? 'Caution' : 'Safe';
     const roleColor = d.role === 'Suspect' ? 'var(--red)' : d.role === 'Mule account' ? 'var(--yellow)' : 'var(--green)';
     const roleBg = d.role === 'Suspect' ? 'var(--red-bg)' : d.role === 'Mule account' ? 'var(--yellow-bg)' : 'var(--green-bg)';
     grid.innerHTML += `<div class="score-card">
@@ -494,28 +528,27 @@ function runAnalysis() {
 
   // Chain visual
   const chain = document.getElementById('chain-visual');
-  const classes = ['source','middle','destination'];
-  const labels = ['Origin account','Mule / relay','Victim account'];
   chain.innerHTML = '';
-  mockData.forEach((d, i) => {
-    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'medium' ? 'var(--yellow)' : 'var(--green)';
+  apiData.forEach((d, i) => {
+    const col = d.risk === 'high' ? 'var(--red)' : d.risk === 'caution' ? 'var(--yellow)' : 'var(--green)';
+    const cls = d.risk === 'high' ? 'source' : d.risk === 'caution' ? 'middle' : 'destination';
     chain.innerHTML += `<div class="chain-node">
-      <div class="chain-box ${classes[i]}">
+      <div class="chain-box ${cls}">
         <div class="c-upi">${d.upi}</div>
         <div class="c-role">${d.role}</div>
         <div class="c-score" style="color:${col}">${d.score}/100</div>
       </div>
-      <div class="chain-label">${labels[i]}</div>
+      <div class="chain-label">Node ${i+1}</div>
     </div>`;
-    if (i < mockData.length - 1) chain.innerHTML += `<div class="chain-arrow">&#x2192;</div>`;
+    if (i < apiData.length - 1) chain.innerHTML += `<div class="chain-arrow">&#x2192;</div>`;
   });
 
   // Factors table
   const tbody = document.getElementById('factors-body');
   tbody.innerHTML = '';
-  mockData.forEach(d => {
-    const pillClass = d.risk === 'high' ? 'pill-red' : d.risk === 'medium' ? 'pill-yellow' : 'pill-green';
-    const pillLabel = d.risk === 'high' ? 'High' : d.risk === 'medium' ? 'Caution' : 'Safe';
+  apiData.forEach(d => {
+    const pillClass = d.risk === 'high' ? 'pill-red' : d.risk === 'caution' ? 'pill-yellow' : 'pill-green';
+    const pillLabel = d.risk === 'high' ? 'High' : d.risk === 'caution' ? 'Caution' : 'Safe';
     tbody.innerHTML += `<tr>
       <td style="font-family:monospace;font-size:12px">${d.upi}</td>
       <td>${d.role}</td>
@@ -527,7 +560,7 @@ function runAnalysis() {
   });
 
   // AI summary
-  document.getElementById('ai-summary').textContent = 'Analysis shows a classic 3-node UPI fraud chain. The origin account (suspect1@okicici) was created 8 days ago — consistent with burner account behavior seen in advance fee and investment scam patterns. Funds moved to mule1@paytm (relay account with 3 prior reports) before reaching the suspect\'s withdrawal point. The victim\'s account (victim@ybl) has a clean 2-year history confirming innocent mule account freezing risk. Recommend immediate freezing of the origin and relay accounts and filing for blockchain evidence export.';
+  document.getElementById('ai-summary').textContent = 'AI Investigation Summary: ' + apiData.map(d => d.upi + ': ' + d.ai).join(' | ');
 
   // Evidence
   const hash = Array.from({length:64}, () => '0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
@@ -535,7 +568,7 @@ function runAnalysis() {
   document.getElementById('evidence-box').innerHTML = `
     <div class="evidence-row"><span class="evidence-key">Case number</span><span class="evidence-val">${document.getElementById('case-num').value || 'FIR/2026/NCP/DRAFT'}</span></div>
     <div class="evidence-row"><span class="evidence-key">Generated at</span><span class="evidence-val">${now}</span></div>
-    <div class="evidence-row"><span class="evidence-key">UPI IDs analysed</span><span class="evidence-val">${mockData.map(d=>d.upi).join(', ')}</span></div>
+    <div class="evidence-row"><span class="evidence-key">UPI IDs analysed</span><span class="evidence-val">${apiData.map(d=>d.upi).join(', ')}</span></div>
     <div class="evidence-row"><span class="evidence-key">SHA-256 hash</span><span class="evidence-val" id="ev-hash">${hash}</span></div>
     <div class="evidence-row"><span class="evidence-key">Verified by</span><span class="evidence-val">PayGuard-Neural Blockchain Registry v1.0</span></div>
   `;

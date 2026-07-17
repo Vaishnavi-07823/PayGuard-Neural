@@ -372,30 +372,53 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 </div>
 
 <script>
-const data = {
-  high:{score:18,title:'High risk — do not send money',desc:'This UPI ID has multiple fraud reports and appears in an active fraud chain.',col:'#A32D2D',bg:'#FCEBEB',fill:'#E24B4A',age:'11 days old',reports:'14 reports',pattern:'Unusual spikes',chain:'Linked to 3 cases',ai:'This UPI ID was registered only 11 days ago and has been reported 14 times by the PayGuard community. It appears in an active fraud chain traced by Nagpur Cyber Police. Sending money here is very risky — do not proceed.'},
-  mid:{score:54,title:'Caution — verify before sending',desc:'Some risk signals detected. Verify the receiver before proceeding.',col:'#854F0B',bg:'#FAEEDA',fill:'#EF9F27',age:'4 months old',reports:'2 reports',pattern:'Slightly unusual',chain:'No direct link',ai:'This UPI ID has limited history and 2 unverified community reports. Transaction patterns look slightly unusual. We recommend calling the receiver to verify identity before sending money.'},
-  safe:{score:87,title:'Safe to proceed',desc:'No fraud signals detected. This UPI ID has a clean history.',col:'#3B6D11',bg:'#EAF3DE',fill:'#639922',age:'2+ years old',reports:'0 reports',pattern:'Normal',chain:'Not linked',ai:'This UPI ID has a clean 2-year history with zero community fraud reports and no match in our blockchain fraud registry. Transaction patterns look completely normal. Safe to proceed — but always stay alert.'}
-};
-
-function getScenario(v){
-  if(v.includes('99')||v.includes('lucky')||v.includes('win')||v.includes('fast')||v.includes('kumar99')) return data.high;
-  if(v.includes('shop')||v.includes('new')||v.includes('deal')||v.includes('offer')||v.includes('meera')) return data.mid;
-  return data.safe;
-}
-
-function runCheck(){
-  const v = document.getElementById('upi-input').value.trim().toLowerCase();
+async function runCheck(){
+  const v = document.getElementById('upi-input').value.trim();
   if(!v) return;
-  const d = getScenario(v);
-  applyResult(d);
+  await fetchAndApply(v);
 }
 
-function quickCheck(upi){
+async function quickCheck(upi){
   document.getElementById('upi-input').value = upi;
   showTab('check', document.querySelector('.sidebar-item'));
-  const d = getScenario(upi.toLowerCase());
-  applyResult(d);
+  await fetchAndApply(upi);
+}
+
+async function fetchAndApply(upi) {
+  try {
+    const res = await fetch('/api/check-transaction', {
+      method: 'POST',
+      body: JSON.stringify({ upi_id: upi }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('API request failed');
+    const data = await res.json();
+    
+    // Map API data to UI format
+    let d = {};
+    if (data.risk_level === 'HIGH_RISK') {
+      d = { score: data.final_score, title: 'High risk — do not send money', desc: 'This UPI ID has multiple fraud reports and appears in an active fraud chain.', col: '#A32D2D', bg: '#FCEBEB', fill: '#E24B4A' };
+    } else if (data.risk_level === 'CAUTION') {
+      d = { score: data.final_score, title: 'Caution — verify before sending', desc: 'Some risk signals detected. Verify the receiver before proceeding.', col: '#854F0B', bg: '#FAEEDA', fill: '#EF9F27' };
+    } else {
+      d = { score: data.final_score, title: 'Safe to proceed', desc: 'No fraud signals detected. This UPI ID has a clean history.', col: '#3B6D11', bg: '#EAF3DE', fill: '#639922' };
+    }
+    
+    // Extrapolate features based on breakdown
+    const breakdown = data.breakdown || {};
+    const chainDepth = breakdown.chain_score < 100 ? 1 : 0; // rough proxy if full depth isn't flat mapped
+    
+    d.age = 'Check AI explainer';
+    d.reports = 'Check AI explainer';
+    d.pattern = (data.final_score < 40) ? 'Unusual' : 'Normal';
+    d.chain = (data.final_score < 80) ? 'Linked' : 'Not linked';
+    d.ai = data.explanation || 'Explanation unavailable.';
+    
+    applyResult(d);
+  } catch(err) {
+    console.error(err);
+    alert('Error connecting to the backend API.');
+  }
 }
 
 function applyResult(d){
@@ -428,11 +451,20 @@ function showTab(name, el){
   }
 }
 
-function submitReport(){
+async function submitReport(){
   const upi = document.getElementById('report-upi').value.trim();
   if(!upi){alert('Please enter a UPI ID');return;}
-  alert('Report submitted! Thank you for helping protect the community.\n\n'+upi+' has been flagged for review.');
-  document.getElementById('report-upi').value='';
+  try {
+    await fetch('/api/report-fraud', {
+      method: 'POST',
+      body: JSON.stringify({ upi_id: upi }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    alert('Report submitted! Thank you for helping protect the community.\\n\\n'+upi+' has been flagged for review.');
+    document.getElementById('report-upi').value='';
+  } catch(err) {
+    alert('Error submitting report.');
+  }
 }
 
 document.getElementById('upi-input').addEventListener('keydown',e=>{if(e.key==='Enter')runCheck();});

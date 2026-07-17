@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "app/main.py", "use": "@vercel/python" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "login.html", "use": "@vercel/static" },
+    { "src": "dashboard.html", "use": "@vercel/static" },
+    { "src": "police.html", "use": "@vercel/static" },
+    { "src": "kyc.html", "use": "@vercel/static" },
+    { "src": "*.css", "use": "@vercel/static" },
+    { "src": "*.png", "use": "@vercel/static" },
+    { "src": "*.js", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "app/main.py" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}

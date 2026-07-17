@@ -5,3 +5,5 @@ joblib==1.4.2
 anthropic==0.52.0
 numpy==2.2.3
 python-dotenv==1.1.0
+pymongo==4.10.1
+dnspython==2.7.0
