@@ -12,9 +12,9 @@
 
 During my internship at **Nagpur Cyber Police Station** (authorized by Dy. Commissioner Lohit Matani IPS), I observed that most UPI fraud complaints came in *after* the money had already moved through 3–4 accounts. Innocent account holders were getting frozen because funds passed through them in a fraud chain.
 
-**Current gap:** No system checks transaction risk *before* processing.
+**Current gap:** No system checks transaction risk *before* processing to protect the receiver.
 
-**PayGuard-Neural** solves this by assigning a Safety Score (0–100) to every UPI transaction before it happens.
+**PayGuard-Neural** solves this by acting as an Inbound Protection Gateway. It assigns a Safety Score (0–100) to every sender before allowing the money into the receiver's account, preventing innocent accounts from being frozen.
 
 ---
 
@@ -45,6 +45,7 @@ During my internship at **Nagpur Cyber Police Station** (authorized by Dy. Commi
 ## Features
 
 ### Consumer Dashboard
+- Inbound Payment Protection (Generate Secure Payment Links)
 - Pre-transaction UPI ID safety check
 - Real-time risk score (0–100) with Red/Yellow/Green signal
 - AI-powered risk explanation in plain language
@@ -52,6 +53,7 @@ During my internship at **Nagpur Cyber Police Station** (authorized by Dy. Commi
 - Check history and personal stats
 
 ### Police Investigation Panel
+- Direct Blacklist Portal (Block fraudulent UPI IDs globally)
 - New case creation with FIR number and UPI IDs
 - Visual fraud chain tracer (A→B→C→D money flow)
 - Factor breakdown table per UPI ID

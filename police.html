@@ -161,6 +161,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
       <div class="sidebar-item" onclick="showTab('chain')">
         <span class="icon">&#x26D3;</span> Chain tracer
       </div>
+      <div class="sidebar-item" onclick="showTab('blacklist')">
+        <span class="icon">&#x26D4;</span> Blacklist Portal
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Tools</div>
@@ -356,6 +359,29 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
           <textarea placeholder="suspect@okicici&#10;mule1@paytm&#10;mule2@ybl&#10;cashout@airtel" style="min-height:100px"></textarea>
         </div>
         <button class="btn-primary">&#x26D3; Trace chain</button>
+      </div>
+    </div>
+
+    <!-- BLACKLIST PORTAL TAB -->
+    <div id="tab-blacklist" class="hidden">
+      <div class="page-title">Direct Blacklist Portal</div>
+      <div class="page-sub">Add known fraudulent UPI IDs directly to the national blocklist. This instantly prevents inbound payments to these IDs.</div>
+      <div class="card">
+        <div class="card-title">Add to Blocklist</div>
+        <div class="field">
+          <label>Fraudulent UPI ID</label>
+          <input type="text" id="blacklist-upi" placeholder="e.g. fraudster@ybl"/>
+        </div>
+        <div class="field">
+          <label>Reason / FIR Reference</label>
+          <input type="text" id="blacklist-reason" placeholder="e.g. FIR/2026/NCP/0045 - Fake Customer Care"/>
+        </div>
+        <button class="btn-danger" onclick="submitBlacklist()">&#x26D4; Add to Blacklist</button>
+      </div>
+      <div class="card">
+        <div style="padding:14px;border-radius:10px;background:var(--red-bg);border:1px solid var(--red-fill)">
+          <p style="font-size:13px;color:var(--red)">&#x26A0;&#xFE0F; Warning: Any UPI ID added here will trigger an automatic HIGH RISK flag globally. Transactions to or from this ID will be blocked by the Inbound Security Gateway.</p>
+        </div>
       </div>
     </div>
 
@@ -585,6 +611,29 @@ function copyHash() {
 
 function flagAllUPI() {
   alert('All 3 UPI IDs have been flagged in the community fraud database.\nOther PayGuard-Neural users will now see a HIGH RISK warning for these IDs.');
+}
+
+async function submitBlacklist() {
+  const upi = document.getElementById('blacklist-upi').value.trim();
+  const reason = document.getElementById('blacklist-reason').value.trim();
+  if(!upi) {
+    alert("Please enter a UPI ID to blacklist.");
+    return;
+  }
+  
+  try {
+    // We reuse the report-fraud endpoint for this prototype to update the DB
+    await fetch('/api/report-fraud', {
+      method: 'POST',
+      body: JSON.stringify({ upi_id: upi, reason: reason }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    alert(`SUCCESS: ${upi} has been added to the global blacklist.\n\nThe Inbound Protection Gateway will now automatically block any transactions involving this UPI ID.`);
+    document.getElementById('blacklist-upi').value = '';
+    document.getElementById('blacklist-reason').value = '';
+  } catch(err) {
+    alert('Error connecting to backend.');
+  }
 }
 </script>
 </body>

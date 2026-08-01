@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Secure Payment Gateway</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-dark:#3C3489;
+  --text:#1A1A2E;--text-muted:#666;
+  --bg:#f0f2f5;--bg-card:#fff;--border:#E4E4F0;
+  --red:#A32D2D;--red-bg:#FCEBEB;--red-fill:#E24B4A;
+  --green:#3B6D11;--green-bg:#EAF3DE;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.gateway-card{background:var(--bg-card);width:100%;max-width:400px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.08);overflow:hidden}
+.g-header{background:var(--purple);color:#fff;padding:24px;text-align:center}
+.merchant-name{font-size:18px;font-weight:600;margin-bottom:4px}
+.merchant-note{font-size:13px;opacity:0.8}
+.amount-display{font-size:36px;font-weight:700;margin-top:16px}
+.g-body{padding:24px}
+.field{margin-bottom:20px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.field input{width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:15px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--purple)}
+.btn-pay{width:100%;padding:16px;border-radius:8px;background:var(--purple);color:#fff;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-pay:hover{opacity:0.9}
+.btn-pay:disabled{opacity:0.5;cursor:not-allowed}
+.secure-badge{text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* STATE SCREENS */
+.screen{display:none;padding:32px 24px;text-align:center}
+.screen.active{display:block}
+.icon-big{font-size:48px;margin-bottom:16px}
+.title-big{font-size:20px;font-weight:700;margin-bottom:8px}
+.desc{font-size:14px;color:var(--text-muted);margin-bottom:24px}
+
+.blocked-box{background:var(--red-bg);border:2px solid var(--red-fill);border-radius:12px;padding:20px;text-align:left;margin-bottom:20px}
+.blocked-title{color:var(--red);font-weight:700;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.blocked-desc{color:#555;font-size:13px;line-height:1.5}
+
+.loader{border:3px solid var(--bg);border-top:3px solid var(--purple);border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="gateway-card">
+  <!-- PAYMENT SCREEN -->
+  <div id="screen-pay" class="screen active">
+    <div class="g-header">
+      <div class="merchant-name">PayGuard Secure Merchant</div>
+      <div class="merchant-note" id="display-note">Payment</div>
+      <div class="amount-display">₹<span id="display-amount">0.00</span></div>
+    </div>
+    <div class="g-body">
+      <div class="field">
+        <label>Enter your UPI ID to pay</label>
+        <input type="text" id="sender-upi" placeholder="e.g. sender@okicici" />
+      </div>
+      <button class="btn-pay" id="btn-pay" onclick="processPayment()">Pay Securely</button>
+      <div class="secure-badge">
+        <span>&#x1F512;</span> Secured by PayGuard-Neural Inbound Protection
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div id="screen-loading" class="screen">
+    <div class="loader"></div>
+    <div class="title-big">Processing...</div>
+    <div class="desc">Please wait while we verify the transaction securely.</div>
+  </div>
+
+  <!-- BLOCKED SCREEN -->
+  <div id="screen-blocked" class="screen">
+    <div class="icon-big">&#x26D4;</div>
+    <div class="title-big" style="color:var(--red)">Transaction Blocked</div>
+    <div class="desc">The transaction was declined by the receiver's bank.</div>
+    
+    <div class="blocked-box">
+      <div class="blocked-title"><span>&#x26A0;&#xFE0F;</span> Security Protocol Triggered</div>
+      <div class="blocked-desc">
+        Your UPI ID has been flagged by PayGuard-Neural due to suspicious activity. To protect the receiver's account from being frozen, this inbound payment has been permanently blocked.
+      </div>
+    </div>
+    <button class="btn-pay" onclick="reset()" style="background:var(--red)">Return</button>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="screen-success" class="screen">
+    <div class="icon-big" style="color:var(--green)">&#x2714;&#xFE0F;</div>
+    <div class="title-big" style="color:var(--green)">Payment Successful</div>
+    <div class="desc">₹<span id="success-amount"></span> has been securely transferred.</div>
+    <div class="secure-badge" style="color:var(--green)">
+      <span>&#x1F6E1;</span> Sender verified as SAFE
+    </div>
+    <button class="btn-pay" onclick="reset()" style="background:var(--green);margin-top:20px">Done</button>
+  </div>
+</div>
+
+<script>
+// Parse URL params
+const params = new URLSearchParams(window.location.search);
+const amount = params.get('amount') || '0';
+const note = params.get('note') || 'Payment';
+
+document.getElementById('display-amount').textContent = amount;
+document.getElementById('success-amount').textContent = amount;
+document.getElementById('display-note').textContent = note;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+async function processPayment() {
+  const upi = document.getElementById('sender-upi').value.trim();
+  if(!upi) {
+    alert("Please enter a UPI ID to simulate sending money.");
+    return;
+  }
+
+  showScreen('loading');
+
+  try {
+    const res = await fetch('/api/check-transaction', {
+      method: 'POST',
+      body: JSON.stringify({ upi_id: upi }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error('API request failed');
+    const data = await res.json();
+    
+    // Simulate network delay for UX
+    setTimeout(() => {
+      if (data.risk_level === 'HIGH_RISK') {
+        // Block the transaction!
+        showScreen('blocked');
+      } else {
+        // Allow the transaction
+        showScreen('success');
+      }
+    }, 1200);
+
+  } catch(err) {
+    console.error(err);
+    alert('Network error connecting to payment gateway.');
+    showScreen('pay');
+  }
+}
+
+function reset() {
+  document.getElementById('sender-upi').value = '';
+  showScreen('pay');
+}
+</script>
+</body>
+</html>

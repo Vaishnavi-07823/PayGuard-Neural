@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PayGuard-Neural — Receive Safely</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-dark:#3C3489;--purple-light:#EEEDFE;--purple-border:#AFA9EC;
+  --text:#1A1A2E;--text-muted:#666;--text-faint:#999;
+  --bg:#fff;--bg2:#F8F8FC;--border:#E4E4F0;
+  --green-bg:#EAF3DE;--green:#3B6D11;--green-fill:#639922;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg2);line-height:1.6}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+.logo{font-size:16px;font-weight:600}.logo span{color:var(--purple)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-badge{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-border);font-weight:500}
+.nav-user{font-size:13px;color:var(--text-muted)}
+.btn-sm{padding:6px 14px;border-radius:7px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text)}
+.btn-sm:hover{background:var(--bg2)}
+
+.container{max-width:600px;margin:40px auto;padding:0 20px}
+.page-title{font-size:24px;font-weight:700;margin-bottom:4px;text-align:center}
+.page-sub{font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:30px}
+
+.card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-size:13px;font-weight:600;color:var(--text)}
+.field input{padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:15px;color:var(--text);background:var(--bg);outline:none;transition:border .2s}
+.field input:focus{border-color:var(--purple)}
+
+.btn-primary{width:100%;padding:14px;border-radius:8px;background:var(--purple);color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:600;transition:background .2s}
+.btn-primary:hover{background:var(--purple-dark)}
+
+.qr-box{display:none;text-align:center;margin-top:24px;padding-top:24px;border-top:1px dashed var(--border)}
+.qr-placeholder{width:180px;height:180px;background:var(--bg2);border:2px dashed var(--purple-border);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted)}
+.link-box{background:var(--bg2);border:1px solid var(--border);padding:10px 14px;border-radius:8px;font-family:monospace;font-size:13px;color:var(--text);word-break:break-all;margin-bottom:12px}
+.btn-copy{padding:8px 16px;border-radius:6px;background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-border);font-size:13px;cursor:pointer;font-weight:600}
+.btn-copy:hover{background:#E0DDF9}
+.btn-test{margin-top:10px;padding:8px 16px;border-radius:6px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-fill);font-size:13px;cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">PayGuard<span>-Neural</span></span>
+  <div class="nav-right">
+    <span class="nav-badge">&#x1F6E1; Protected</span>
+    <span class="nav-user">Vaishnavi</span>
+    <button class="btn-sm" onclick="window.location.href='dashboard.html'">&#x2190; Dashboard</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-title">Receive Money Safely</div>
+  <div class="page-sub">Generate a secure payment link. We will check the sender's risk profile before allowing the money into your account.</div>
+
+  <div class="card">
+    <div class="field">
+      <label>Amount to Receive (₹)</label>
+      <input type="number" id="amount" placeholder="e.g. 500" required />
+    </div>
+    <div class="field">
+      <label>Payment Note / Description</label>
+      <input type="text" id="note" placeholder="e.g. Groceries" />
+    </div>
+    
+    <button class="btn-primary" onclick="generateLink()">Generate Secure Link</button>
+
+    <div class="qr-box" id="qr-box">
+      <h3 style="font-size:15px;margin-bottom:12px;color:var(--green)">&#x2713; Secure Link Generated</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Share this link or QR code with the customer.</p>
+      
+      <!-- Fake QR -->
+      <div class="qr-placeholder">
+        [ QR Code Image ]<br>Scan to Pay
+      </div>
+
+      <div class="link-box" id="pay-link">http://localhost:5000/pay_gateway.html?amount=500</div>
+      
+      <button class="btn-copy" onclick="copyLink()">&#x1F4CB; Copy Link</button>
+      <br>
+      <button class="btn-test" onclick="openGateway()">&#x1F517; Open Link as Sender (Mock)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUrl = '';
+
+function generateLink() {
+  const amount = document.getElementById('amount').value;
+  if(!amount || amount <= 0) {
+    alert("Please enter a valid amount.");
+    return;
+  }
+  const note = encodeURIComponent(document.getElementById('note').value || 'Payment');
+  
+  // Create URL pointing to our mock gateway
+  const baseUrl = window.location.origin;
+  currentUrl = `${baseUrl}/pay_gateway.html?amount=${amount}&note=${note}`;
+  
+  document.getElementById('pay-link').textContent = currentUrl;
+  document.getElementById('qr-box').style.display = 'block';
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(currentUrl);
+  alert("Link copied to clipboard!");
+}
+
+function openGateway() {
+  window.open(currentUrl, '_blank');
+}
+</script>
+</body>
+</html>
