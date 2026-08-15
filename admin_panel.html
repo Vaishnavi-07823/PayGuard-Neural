@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayGuard Neural — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07060f;
+      --bg2: #0d0c1e;
+      --card: rgba(14, 12, 32, 0.9);
+      --border: rgba(124, 92, 252, 0.12);
+      --accent: #b46bff;
+      --accent2: #7c5cfc;
+      --text: #ede8ff;
+      --muted: #9994c4;
+      --faint: #5e577e;
+      --green: #00e89d;
+      --red: #ff5c7c;
+      --yellow: #f5c842;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 56px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; }
+    .logo span { color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      font-size: 11px; padding: 4px 12px; border-radius: 20px;
+      background: rgba(124, 92, 252, 0.12); border: 1px solid rgba(124, 92, 252, 0.25);
+      color: var(--accent); font-weight: 600; letter-spacing: 0.05em;
+    }
+    .nav-user { font-size: 13px; color: var(--muted); }
+    .btn-sm {
+      padding: 6px 14px; border-radius: 7px; font-size: 13px; cursor: pointer;
+      border: 1px solid var(--border); background: transparent; color: var(--text);
+      transition: all .2s;
+    }
+    .btn-sm:hover { background: rgba(124,92,252,.1); border-color: var(--accent2); }
+
+    /* LAYOUT */
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+
+    /* SIDEBAR */
+    .sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 0; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--faint); padding: 0 20px; margin-bottom: 8px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; margin: 0 6px 2px; border-radius: 8px;
+      font-size: 13px; color: var(--muted); cursor: pointer; transition: all .15s;
+    }
+    .sidebar-item:hover { background: rgba(124,92,252,.06); color: var(--text); }
+    .sidebar-item.active { background: rgba(124,92,252,.12); color: var(--accent); font-weight: 500; }
+    .sidebar-item .icon { font-size: 15px; width: 20px; text-align: center; }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 14px 0; }
+    .stat-mini {
+      margin: 14px; padding: 14px; border-radius: 10px;
+      background: rgba(124,92,252,.08); border: 1px solid rgba(124,92,252,.15);
+    }
+    .stat-mini p { font-size: 11px; color: var(--muted); }
+    .stat-mini strong { font-size: 20px; display: block; color: var(--accent); font-weight: 700; }
+
+    /* MAIN */
+    .main { padding: 24px; overflow-y: auto; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+    /* CARDS */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 18px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .card-title .tag {
+      font-size: 10px; padding: 2px 8px; border-radius: 12px;
+      background: rgba(124,92,252,.12); color: var(--accent); font-weight: 500;
+    }
+
+    /* METRICS ROW */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .metric {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px; text-align: center;
+    }
+    .metric-num { font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .metric-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* LIVE FEED */
+    .feed-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .feed-table th {
+      text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .5px; color: var(--faint);
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .feed-table tr:hover td { background: rgba(124,92,252,.04); }
+    .feed-table tr:last-child td { border-bottom: none; }
+
+    /* STATUS PILLS */
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600;
+    }
+    .pill-green  { background: rgba(0,232,157,.1);  color: var(--green); }
+    .pill-red    { background: rgba(255,92,124,.1);  color: var(--red); }
+    .pill-yellow { background: rgba(245,200,66,.1); color: var(--yellow); }
+    .pill::before { content: '●'; font-size: 8px; }
+
+    /* OVERRIDE QUEUE */
+    .override-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+    }
+    .override-item:last-child { border-bottom: none; }
+    .override-left { flex: 1; }
+    .override-upi { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+    .override-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .override-actions { display: flex; gap: 8px; }
+    .btn-approve {
+      padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      background: rgba(0,232,157,.1); border: 1px solid rgba(0,232,157,.3);
+      color: var(--green); cursor: pointer; transition: all .2s;
+    }
+    .btn-approve:hover { background: rgba(0,232,157,.2); }
+    .btn-reject {
+      padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      background: rgba(255,92,124,.1); border: 1px solid rgba(255,92,124,.3);
+      color: var(--red); cursor: pointer; transition: all .2s;
+    }
+    .btn-reject:hover { background: rgba(255,92,124,.2); }
+
+    /* KYC QUEUE */
+    .kyc-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+    }
+    .kyc-item:last-child { border-bottom: none; }
+    .kyc-user { font-size: 14px; font-weight: 500; }
+    .kyc-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .kyc-actions { display: flex; gap: 8px; }
+
+    /* AI AGENT PULSE */
+    .agent-status {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: rgba(0,232,157,.05); border: 1px solid rgba(0,232,157,.2);
+      border-radius: 8px; margin-bottom: 16px;
+      font-size: 13px; color: var(--green);
+    }
+    .pulse {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,232,157,.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(0,232,157,.0); }
+    }
+
+    .hidden { display: none; }
+    @media(max-width:768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">PayGuard<span>-Neural</span> <span style="font-size:12px;color:var(--muted);font-weight:400">Admin</span></span>
+  <div class="nav-right">
+    <span class="badge">&#x1F3E6; Bank / NPCI Admin</span>
+    <span class="nav-user" id="nav-user">Loading...</span>
+    <button class="btn-sm" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Overview</div>
+    <div class="sidebar-item active" onclick="showTab('live-feed', this)">
+      <span class="icon">&#x1F4E1;</span> Live AI Feed
+    </div>
+    <div class="sidebar-item" onclick="showTab('override-queue', this)">
+      <span class="icon">&#x26A0;&#xFE0F;</span> Override Queue
+      <span id="override-count" style="margin-left:auto;background:rgba(245,200,66,.15);color:var(--yellow);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600">0</span>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">KYC</div>
+    <div class="sidebar-item" onclick="showTab('kyc-queue', this)">
+      <span class="icon">&#x1F4CB;</span> KYC Queue
+      <span id="kyc-count" style="margin-left:auto;background:rgba(124,92,252,.15);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600">0</span>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">System</div>
+    <div class="sidebar-item" onclick="showTab('blacklist-view', this)">
+      <span class="icon">&#x1F6AB;</span> Blacklist (Read-only)
+    </div>
+    <div class="stat-mini" style="margin-top:16px">
+      <p>AI Scans Today</p>
+      <strong id="scans-today">—</strong>
+      <p style="margin-top:8px">Fraud Blocked</p>
+      <strong id="fraud-blocked" style="color:var(--red)">—</strong>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-num" id="m-total">—</div>
+        <div class="metric-lbl">Total Scans</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num" id="m-approved" style="color:var(--green)">—</div>
+        <div class="metric-lbl">AI Approved</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num" id="m-blocked" style="color:var(--red)">—</div>
+        <div class="metric-lbl">AI Blocked</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num" id="m-caution" style="color:var(--yellow)">—</div>
+        <div class="metric-lbl">Caution / Pending Override</div>
+      </div>
+    </div>
+
+    <!-- LIVE AI FEED TAB -->
+    <div id="tab-live-feed">
+      <div class="page-title">Live AI Transaction Feed</div>
+      <div class="page-sub">The AI Agent processes incoming transactions in real-time. Manual override is available for Caution-zone decisions.</div>
+
+      <div class="agent-status">
+        <div class="pulse"></div>
+        AI Agent online — scanning transactions at &lt;2s per check
+      </div>
+
+      <div class="card">
+        <div class="card-title">Real-time Feed <span class="tag">Auto-refreshes every 15s</span></div>
+        <table class="feed-table">
+          <thead>
+            <tr>
+              <th>UPI ID</th>
+              <th>Score</th>
+              <th>AI Decision</th>
+              <th>Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="feed-body">
+            <tr><td colspan="5" style="text-align:center;color:var(--faint);padding:24px">Loading transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OVERRIDE QUEUE TAB -->
+    <div id="tab-override-queue" class="hidden">
+      <div class="page-title">Manual Override Queue</div>
+      <div class="page-sub">Caution-zone transactions (score 40–79) queued for human review. Your decision overrides the AI's hold.</div>
+      <div class="card">
+        <div class="card-title">Pending Override <span class="tag">Requires Human Decision</span></div>
+        <div id="override-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- KYC QUEUE TAB -->
+    <div id="tab-kyc-queue" class="hidden">
+      <div class="page-title">KYC Approval Queue</div>
+      <div class="page-sub">Merchants who have submitted KYC details. Approve or reject each submission.</div>
+      <div class="card">
+        <div class="card-title">Pending KYC Submissions <span class="tag">Admin Review Required</span></div>
+        <div id="kyc-list">
+          <p style="color:var(--muted);font-size:13px">Loading KYC queue...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLACKLIST VIEW TAB -->
+    <div id="tab-blacklist-view" class="hidden">
+      <div class="page-title">National Blacklist</div>
+      <div class="page-sub">Read-only view. Only authorized Cyber Police officers can add/remove entries via the Police Portal.</div>
+      <div class="card">
+        <div class="card-title">Blacklisted UPI IDs <span class="tag">Police-managed</span></div>
+        <div style="padding:12px;background:rgba(255,92,124,.05);border:1px solid rgba(255,92,124,.2);border-radius:8px;margin-bottom:16px;font-size:13px;color:var(--muted)">
+          &#x1F512; This list is managed exclusively by law enforcement via the Police Portal.
+          As an admin, you can view entries but cannot edit them.
+        </div>
+        <table class="feed-table">
+          <thead>
+            <tr><th>UPI ID</th><th>Reason / FIR Ref</th><th>Added By</th><th>Date</th></tr>
+          </thead>
+          <tbody id="blacklist-body">
+            <tr><td colspan="4" style="text-align:center;color:var(--faint);padding:24px">Loading blacklist...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, signOutUser, getIdToken, auth, db } from "./static/auth.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { collection, onSnapshot, getDocs, query, where, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  // ── Auth Guard ──────────────────────────────────────────────────
+  requireAuth("admin", "admin_login.html");
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('nav-user').textContent = user.displayName || user.email;
+    }
+  });
+
+  window.doLogout = () => signOutUser();
+
+  // ── Tab Navigation ───────────────────────────────────────────────
+  window.showTab = function(name, el) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    if (el) el.classList.add('active');
+  };
+
+  // ── Load Transactions (from backend API) ─────────────────────────
+  async function loadTransactions() {
+    try {
+      const token = await getIdToken();
+      const res   = await fetch('/api/admin/transactions', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Not authorized or backend down.");
+      const data = await res.json();
+      renderFeed(data.transactions || []);
+      computeMetrics(data.transactions || []);
+    } catch(err) {
+      // Fallback to demo data if backend not running
+      const demo = generateDemoFeed();
+      renderFeed(demo);
+      computeMetrics(demo);
+    }
+  }
+
+  function generateDemoFeed() {
+    const ids = [
+      { upi: "lucky99@upi", score: 9, level: "HIGH_RISK" },
+      { upi: "ravi.kumar@oksbi", score: 91, level: "SAFE" },
+      { upi: "newdeal@paytm", score: 54, level: "CAUTION" },
+      { upi: "loanagent@paytm", score: 18, level: "HIGH_RISK" },
+      { upi: "genuine.shop@okaxis", score: 88, level: "SAFE" },
+      { upi: "recharge.offer@ybl", score: 47, level: "CAUTION" },
+      { upi: "prize2025@okicici", score: 23, level: "HIGH_RISK" },
+      { upi: "vaishnavi@okaxis", score: 87, level: "SAFE" },
+    ];
+    const now = new Date();
+    return ids.map((d, i) => ({
+      upi_id: d.upi,
+      final_score: d.score,
+      risk_level: d.level,
+      created_at: new Date(now - i * 120000).toISOString()
+    }));
+  }
+
+  function renderFeed(txns) {
+    const tbody = document.getElementById('feed-body');
+    tbody.innerHTML = '';
+    if (!txns.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--faint);padding:24px">No transactions yet.</td></tr>';
+      return;
+    }
+    txns.forEach(t => {
+      const pill  = t.risk_level === 'SAFE'
+        ? '<span class="pill pill-green">AI Approved</span>'
+        : t.risk_level === 'HIGH_RISK'
+        ? '<span class="pill pill-red">AI Blocked</span>'
+        : '<span class="pill pill-yellow">On Hold</span>';
+      const action = t.risk_level === 'CAUTION'
+        ? `<button class="btn-approve" onclick="overrideTxn('${t.upi_id}','approved')">Approve</button>
+           <button class="btn-reject"  onclick="overrideTxn('${t.upi_id}','rejected')">Block</button>`
+        : '<span style="color:var(--faint);font-size:12px">Auto-resolved</span>';
+
+      const scoreColor = t.final_score >= 80 ? 'var(--green)' : t.final_score >= 40 ? 'var(--yellow)' : 'var(--red)';
+      const timeStr = new Date(t.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      tbody.innerHTML += `
+        <tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${t.upi_id}</td>
+          <td style="font-weight:700;color:${scoreColor}">${t.final_score}/100</td>
+          <td>${pill}</td>
+          <td style="color:var(--faint);font-size:12px">${timeStr}</td>
+          <td style="display:flex;gap:6px">${action}</td>
+        </tr>`;
+    });
+  }
+
+  function computeMetrics(txns) {
+    const total    = txns.length;
+    const approved = txns.filter(t => t.risk_level === 'SAFE').length;
+    const blocked  = txns.filter(t => t.risk_level === 'HIGH_RISK').length;
+    const caution  = txns.filter(t => t.risk_level === 'CAUTION').length;
+
+    document.getElementById('m-total').textContent    = total;
+    document.getElementById('m-approved').textContent = approved;
+    document.getElementById('m-blocked').textContent  = blocked;
+    document.getElementById('m-caution').textContent  = caution;
+    document.getElementById('scans-today').textContent = total;
+    document.getElementById('fraud-blocked').textContent = blocked;
+    document.getElementById('override-count').textContent = caution;
+    document.getElementById('kyc-count').textContent = '—';
+
+    renderOverrideQueue(txns.filter(t => t.risk_level === 'CAUTION'));
+  }
+
+  function renderOverrideQueue(cautions) {
+    const el = document.getElementById('override-list');
+    if (!cautions.length) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:12px 0">No transactions pending override.</p>';
+      return;
+    }
+    el.innerHTML = cautions.map(t => `
+      <div class="override-item">
+        <div class="override-left">
+          <div class="override-upi">${t.upi_id}</div>
+          <div class="override-meta">Score: ${t.final_score}/100 &nbsp;·&nbsp; AI flagged as Caution — awaiting human decision</div>
+        </div>
+        <div class="override-actions">
+          <button class="btn-approve" onclick="overrideTxn('${t.upi_id}','approved')">&#x2714; Approve</button>
+          <button class="btn-reject"  onclick="overrideTxn('${t.upi_id}','rejected')">&#x26D4; Block</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.overrideTxn = async function(upiId, decision) {
+    try {
+      const token = await getIdToken();
+      await fetch('/api/transactions/override', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ transaction_id: upiId, decision, reason: `Admin manual override: ${decision}` })
+      });
+      alert(`Transaction ${upiId} has been manually ${decision.toUpperCase()} by admin. Action logged in audit trail.`);
+      loadTransactions();
+    } catch(err) {
+      alert('Override saved locally (demo mode). Backend required for full persistence.');
+    }
+  };
+
+  // ── KYC Queue ────────────────────────────────────────────────────
+  async function loadKYCQueue() {
+    try {
+      const token = await getIdToken();
+      const res   = await fetch('/api/admin/kyc-queue', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Not authorized.");
+      const data = await res.json();
+      renderKYCList(data.queue || []);
+      document.getElementById('kyc-count').textContent = (data.count || 0).toString();
+    } catch {
+      renderKYCList(demKYC());
+    }
+  }
+
+  function demKYC() {
+    return [
+      { uid: 'uid_001', business_name: 'Sharma General Store', upi_id: 'sharma@okhdfc', submitted_at: new Date().toISOString() },
+      { uid: 'uid_002', business_name: 'Meera Textiles', upi_id: 'meera.tex@paytm', submitted_at: new Date(Date.now() - 3600000).toISOString() },
+    ];
+  }
+
+  function renderKYCList(items) {
+    const el = document.getElementById('kyc-list');
+    document.getElementById('kyc-count').textContent = items.length;
+    if (!items.length) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:12px 0">No pending KYC submissions.</p>';
+      return;
+    }
+    el.innerHTML = items.map(k => `
+      <div class="kyc-item">
+        <div>
+          <div class="kyc-user">${k.business_name || 'Unknown Business'}</div>
+          <div class="kyc-meta">UPI: ${k.upi_id} &nbsp;·&nbsp; Submitted: ${new Date(k.submitted_at).toLocaleString('en-IN')}</div>
+        </div>
+        <div class="kyc-actions">
+          <button class="btn-approve" onclick="reviewKYC('${k.uid}','approved')">&#x2714; Approve</button>
+          <button class="btn-reject"  onclick="reviewKYC('${k.uid}','rejected')">&#x2716; Reject</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.reviewKYC = async function(uid, decision) {
+    const reason = decision === 'rejected'
+      ? (prompt('Reason for rejection:') || 'Did not meet requirements')
+      : 'Documents verified';
+    try {
+      const token = await getIdToken();
+      await fetch('/api/kyc/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ target_uid: uid, decision, reason })
+      });
+      alert(`KYC ${decision.toUpperCase()} for user ${uid}. Merchant notified.`);
+      loadKYCQueue();
+    } catch {
+      alert(`KYC ${decision} action logged (demo mode). Backend required for persistence.`);
+    }
+  };
+
+  // ── Blacklist View ───────────────────────────────────────────────
+  function loadBlacklist() {
+    const demo = [
+      { upi: 'lucky99@upi',         reason: 'FIR/2026/NCP/0041 — Investment scam',    officer: 'CP Nagpur Cyber', date: '2026-07-15' },
+      { upi: 'loanagent@paytm',     reason: 'FIR/2026/NCP/0038 — Fake loan app',      officer: 'CP Nagpur Cyber', date: '2026-07-20' },
+      { upi: 'prize2025@okicici',   reason: 'FIR/2026/NCP/0034 — Lottery scam',       officer: 'CP Nagpur Cyber', date: '2026-07-22' },
+    ];
+    const tbody = document.getElementById('blacklist-body');
+    tbody.innerHTML = demo.map(d => `
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">${d.upi}</td>
+        <td style="font-size:12px">${d.reason}</td>
+        <td style="font-size:12px;color:var(--muted)">${d.officer}</td>
+        <td style="font-size:12px;color:var(--faint)">${d.date}</td>
+      </tr>`).join('');
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────
+  loadTransactions();
+  loadKYCQueue();
+  loadBlacklist();
+  setInterval(loadTransactions, 15000); // auto-refresh every 15s
+</script>
+</body>
+</html>

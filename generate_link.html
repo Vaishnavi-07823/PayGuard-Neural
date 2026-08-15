@@ -59,6 +59,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 
   <div class="card">
     <div class="field">
+      <label>Your UPI ID (Receiver)</label>
+      <input type="text" id="receiver-upi" placeholder="e.g. vaishnavi@okaxis" required />
+    </div>
+    <div class="field">
       <label>Amount to Receive (₹)</label>
       <input type="number" id="amount" placeholder="e.g. 500" required />
     </div>
@@ -74,7 +78,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Share this link or QR code with the customer.</p>
       
       <!-- Fake QR -->
-      <div class="qr-placeholder">
+      <div class="qr-placeholder" id="qr-placeholder">
         [ QR Code Image ]<br>Scan to Pay
       </div>
 
@@ -87,11 +91,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
   </div>
 </div>
 
+<!-- Load QRCode library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 let currentUrl = '';
 
 function generateLink() {
   const amount = document.getElementById('amount').value;
+  const upiId = document.getElementById('receiver-upi').value.trim();
+  
+  if(!upiId) {
+    alert("Please enter a valid receiver UPI ID.");
+    return;
+  }
   if(!amount || amount <= 0) {
     alert("Please enter a valid amount.");
     return;
@@ -100,9 +112,25 @@ function generateLink() {
   
   // Create URL pointing to our mock gateway
   const baseUrl = window.location.origin;
-  currentUrl = `${baseUrl}/pay_gateway.html?amount=${amount}&note=${note}`;
+  currentUrl = `${baseUrl}/pay_gateway.html?amount=${amount}&note=${note}&receiver_upi=${encodeURIComponent(upiId)}`;
   
   document.getElementById('pay-link').textContent = currentUrl;
+  
+  // Clear previous QR code and render the real QR code encoding upi_id:YOUR_UPI_ID
+  const qrPlaceholder = document.getElementById('qr-placeholder');
+  qrPlaceholder.innerHTML = '';
+  qrPlaceholder.style.border = 'none';
+  qrPlaceholder.style.background = 'transparent';
+  
+  new QRCode(qrPlaceholder, {
+    text: `upi_id:${upiId}`,
+    width: 180,
+    height: 180,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+  
   document.getElementById('qr-box').style.display = 'block';
 }
 
