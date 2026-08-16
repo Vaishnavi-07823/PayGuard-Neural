@@ -136,6 +136,95 @@ def health_check():
     })
 
 
+@app.route("/api/dashboard-stats", methods=["GET"])
+def dashboard_stats():
+    """
+    GET /api/dashboard-stats
+    Returns aggregate counts from the in-memory pending_transactions store
+    and the MongoDB transactions_log (if available).
+    """
+    total_scanned   = 0
+    high_risk_blocked = 0
+    fraud_prevented_amount = 0.0
+
+    # Aggregate from in-memory pending_transactions
+    for txn in pending_transactions.values():
+        total_scanned += 1
+        if txn.get("risk_level") == "HIGH_RISK" or txn.get("status") == "blocked":
+            high_risk_blocked += 1
+            fraud_prevented_amount += float(txn.get("amount", 0))
+
+    # Also try to pull from MongoDB transactions_log for persistence across restarts
+    try:
+        from database import get_db
+        dbm = get_db()
+        log_docs = list(dbm["transactions_log"].find({}, {"_id": 0}))
+        total_scanned += len(log_docs)
+        for doc in log_docs:
+            if doc.get("risk_level") == "HIGH_RISK":
+                high_risk_blocked += 1
+                # log_transaction doesn't store amount, so we can't sum it here
+    except Exception:
+        pass  # MongoDB not available — use in-memory only
+
+    return jsonify({
+        "total_scanned":          total_scanned,
+        "high_risk_blocked":      high_risk_blocked,
+        "fraud_prevented_amount": round(fraud_prevented_amount, 2)
+    })
+
+
+@app.route("/api/transactions/recent", methods=["GET"])
+def recent_transactions():
+    """
+    GET /api/transactions/recent
+    Returns the last 5 transactions from the in-memory pending_transactions store,
+    newest first. Falls back to MongoDB transactions_log for older entries.
+    """
+    results = []
+
+    # Collect from in-memory store (already have full detail)
+    for txn in pending_transactions.values():
+        results.append({
+            "transaction_id": txn.get("transaction_id"),
+            "sender_upi":     txn.get("sender_upi", "-"),
+            "receiver_upi":   txn.get("receiver_upi", "-"),
+            "amount":         txn.get("amount", 0),
+            "risk_level":     txn.get("risk_level", "-"),
+            "status":         txn.get("status", "-"),
+            "created_at":     txn.get("created_at", ""),
+        })
+
+    # Sort newest first
+    results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+
+    # If we have fewer than 5, pad with MongoDB log entries (no amount stored there)
+    if len(results) < 5:
+        try:
+            from database import get_db
+            dbm = get_db()
+            log_docs = list(
+                dbm["transactions_log"]
+                .find({}, {"_id": 0})
+                .sort("created_at", -1)
+                .limit(5 - len(results))
+            )
+            for doc in log_docs:
+                results.append({
+                    "transaction_id": doc.get("transaction_id", "-"),
+                    "sender_upi":     doc.get("sender_upi", "-"),
+                    "receiver_upi":   doc.get("upi_id", doc.get("receiver_upi", "-")),
+                    "amount":         doc.get("amount", None),
+                    "risk_level":     doc.get("risk_level", "-"),
+                    "status":         doc.get("status", "logged"),
+                    "created_at":     doc.get("created_at", ""),
+                })
+        except Exception:
+            pass  # MongoDB not available
+
+    return jsonify({"transactions": results[:5]})
+
+
 @app.route("/api/check-transaction", methods=["POST"])
 def check_transaction():
     """
@@ -299,6 +388,16 @@ def initiate_transaction():
         },
         "explanation": explanation
     })
+
+
+@app.route("/api/transaction/<transaction_id>", methods=["GET"])
+def get_transaction(transaction_id):
+    """
+    GET /api/transaction/<transaction_id>
+    """
+    if transaction_id not in pending_transactions:
+        return jsonify({"error": "Transaction not found"}), 404
+    return jsonify(pending_transactions[transaction_id])
 
 
 @app.route("/api/transaction/<transaction_id>/decide", methods=["POST"])

@@ -163,9 +163,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:va
 <script>
 // Parse URL params
 const params = new URLSearchParams(window.location.search);
-const amount = params.get('amount') || '0';
 const note = params.get('note') || 'Payment';
 const receiverUpi = params.get('receiver_upi') || '';
+// Amount: prefer URL param, fall back to whatever is displayed in the header
+const amount = params.get('amount') || document.getElementById('display-amount').textContent || '0';
 
 document.getElementById('display-amount').textContent = amount;
 document.getElementById('success-amount').textContent = amount;
@@ -265,27 +266,9 @@ async function processPayment() {
     // Simulate network delay for UX
     setTimeout(() => {
       if (data.status === 'blocked') {
-        showScreen('blocked');
+        window.location.href = `blocked.html?amount=${encodeURIComponent(amount)}&receiver=${encodeURIComponent(recUpi)}`;
       } else if (data.status === 'pending_decision') {
-        currentTxnId = data.transaction_id;
-        
-        // Populate sender side
-        document.getElementById('pending-sender-upi').textContent = senderUpi;
-        document.getElementById('pending-amount').textContent = amount;
-        
-        // Populate receiver side
-        document.getElementById('receiver-score').textContent = data.final_score;
-        const badge = document.getElementById('receiver-risk-badge');
-        badge.textContent = data.risk_level;
-        badge.className = 'pill'; // Reset class
-        
-        if (data.risk_level === 'SAFE') {
-          badge.classList.add('pill-green');
-        } else {
-          badge.classList.add('pill-yellow');
-        }
-        
-        showScreen('pending');
+        window.location.href = `payment_decision.html?id=${encodeURIComponent(data.transaction_id)}`;
       }
     }, 1200);
 
@@ -296,35 +279,8 @@ async function processPayment() {
   }
 }
 
-async function makeDecision(decision) {
-  if (!currentTxnId) return;
-  
-  showScreen('loading');
-  
-  try {
-    const res = await fetch(`/api/transaction/${currentTxnId}/decide`, {
-      method: 'POST',
-      body: JSON.stringify({ decision: decision }),
-      headers: { 'Content-Type': 'application/json' }
-    });
-    
-    if (!res.ok) throw new Error('API request failed');
-    const data = await res.json();
-    
-    setTimeout(() => {
-      if (data.status === 'accepted') {
-        showScreen('success');
-      } else {
-        showScreen('declined');
-      }
-    }, 1000);
-    
-  } catch(err) {
-    console.error(err);
-    alert('Failed to submit payment decision.');
-    showScreen('pending');
-  }
-}
+// makeDecision no longer used directly in pay_gateway — decisions
+// are now handled by payment_decision.html after redirect.
 
 function reset() {
   document.getElementById('sender-upi').value = '';
