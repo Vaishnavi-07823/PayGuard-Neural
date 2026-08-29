@@ -7,7 +7,6 @@ collections, and seeds demo data.
 WHY MongoDB: Vercel serverless functions are read-only. We need a cloud
 database so users can continue to submit fraud reports after deployment.
 """
-
 import os
 from datetime import datetime, timedelta
 from pymongo import MongoClient
